@@ -32,7 +32,8 @@ const WritingInterface = () => {
     translation,
     handleTextSelect,
     handleSelectionClear,
-    handleCloseTooltip
+    handleCloseTooltip,
+    translateSelectedText
   } = useTranslation(textareaRef);
 
   const handleSignOut = async () => {
@@ -74,6 +75,7 @@ const WritingInterface = () => {
           textareaRef={textareaRef}
           onContentChange={setContent}
           onSave={saveEntry}
+          onTranslate={translateSelectedText}
         />
       </div>
 

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { translateWord } from "../services/realTimeTranslationService";
 
 interface TranslationState {
@@ -12,6 +12,37 @@ interface TranslationState {
 
 export const useTranslation = (textareaRef: React.RefObject<HTMLTextAreaElement>) => {
   const [translation, setTranslation] = useState<TranslationState | null>(null);
+
+  const translateSelectedText = useCallback(async () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return false;
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return false;
+
+    const selectedText = selection.toString().trim();
+    if (!selectedText || selectedText.length < 2) return false;
+
+    const range = selection.getRangeAt(0);
+    if (!textarea.contains(range.commonAncestorContainer)) return false;
+
+    const translationResult = await translateWord(selectedText);
+    if (translationResult) {
+      const rect = range.getBoundingClientRect();
+      setTranslation({
+        word: selectedText,
+        translation: translationResult.translatedText,
+        sourceLanguage: translationResult.sourceLanguage,
+        targetLanguage: translationResult.targetLanguage,
+        position: {
+          x: rect.left + rect.width / 2,
+          y: rect.top
+        }
+      });
+      return true;
+    }
+    return false;
+  }, [textareaRef]);
 
   const handleTextSelect = async (selectedText: string, position: { x: number; y: number }) => {
     if (!selectedText || selectedText.length < 2) {
@@ -43,6 +74,22 @@ export const useTranslation = (textareaRef: React.RefObject<HTMLTextAreaElement>
       window.getSelection()?.removeAllRanges();
     }
   };
+
+  // Add global keyboard shortcut listener
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl+T for translation
+      if (event.ctrlKey && event.key === 't') {
+        event.preventDefault();
+        translateSelectedText();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [translateSelectedText]);
 
   useEffect(() => {
     const handleSelectionChange = async () => {
@@ -94,6 +141,7 @@ export const useTranslation = (textareaRef: React.RefObject<HTMLTextAreaElement>
     translation,
     handleTextSelect,
     handleSelectionClear,
-    handleCloseTooltip
+    handleCloseTooltip,
+    translateSelectedText
   };
 };

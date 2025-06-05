@@ -2,6 +2,7 @@
 import { Save } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { JournalEntry } from "../services/journalService";
+import TranslateButton from "./TranslateButton";
 
 interface WritingEditorProps {
   content: string;
@@ -11,6 +12,7 @@ interface WritingEditorProps {
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   onContentChange: (content: string) => void;
   onSave: () => void;
+  onTranslate: () => void;
 }
 
 const WritingEditor = ({ 
@@ -20,7 +22,8 @@ const WritingEditor = ({
   lastSaved, 
   textareaRef, 
   onContentChange, 
-  onSave 
+  onSave,
+  onTranslate
 }: WritingEditorProps) => {
   const { t } = useLanguage();
 
@@ -36,6 +39,7 @@ const WritingEditor = ({
               {t('journal.savedAt')} {lastSaved.toLocaleTimeString('fr-FR')}
             </span>
           )}
+          <TranslateButton onTranslate={onTranslate} />
           <button
             onClick={onSave}
             disabled={saving || !content.trim()}
@@ -48,7 +52,7 @@ const WritingEditor = ({
       </div>
       
       <p className="text-sm text-gray-600 mb-6">
-        {t('journal.instructions')} Double-click any word or phrase to auto-select and get instant translations.
+        {t('journal.instructions')} Double-click any word or phrase to auto-select and get instant translations. Use <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Ctrl+T</kbd> to translate selected text.
       </p>
       
       <textarea
