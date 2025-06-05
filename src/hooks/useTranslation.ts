@@ -19,17 +19,20 @@ export const useTranslation = (textareaRef: React.RefObject<HTMLTextAreaElement>
       return false;
     }
 
-    // First check if there's a text selection in the window
-    const selection = window.getSelection();
     let selectedText = '';
     let selectionRect: DOMRect | null = null;
 
+    // First check window selection
+    const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
       selectedText = selection.toString().trim();
-      if (selectedText && selectedText.length >= 2) {
+      console.log("Window selection found:", selectedText);
+      
+      if (selectedText && selectedText.length >= 1) {
         const range = selection.getRangeAt(0);
         if (textarea.contains(range.commonAncestorContainer)) {
           selectionRect = range.getBoundingClientRect();
+          console.log("Selection rect from window:", selectionRect);
         }
       }
     }
@@ -38,58 +41,83 @@ export const useTranslation = (textareaRef: React.RefObject<HTMLTextAreaElement>
     if (!selectedText) {
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
+      console.log("Textarea selection start:", start, "end:", end);
       
       if (start !== end) {
         selectedText = textarea.value.substring(start, end).trim();
-        if (selectedText && selectedText.length >= 2) {
-          // Calculate position for textarea selection
-          const rect = textarea.getBoundingClientRect();
-          const lineHeight = 24;
-          const charsPerLine = Math.floor(textarea.clientWidth / 8);
-          const lineNumber = Math.floor(start / charsPerLine);
+        console.log("Textarea selection text:", selectedText);
+        
+        if (selectedText && selectedText.length >= 1) {
+          // Get textarea position and calculate selection position
+          const textareaRect = textarea.getBoundingClientRect();
+          const textBeforeSelection = textarea.value.substring(0, start);
+          const lines = textBeforeSelection.split('\n');
+          const lineNumber = lines.length - 1;
+          const charInLine = lines[lines.length - 1].length;
+          
+          // Estimate character width and line height
+          const charWidth = 8; // approximate
+          const lineHeight = 24; // approximate
+          const padding = 24; // textarea padding
           
           selectionRect = new DOMRect(
-            rect.left + (start % charsPerLine) * 8,
-            rect.top + lineNumber * lineHeight,
-            (end - start) * 8,
+            textareaRect.left + padding + charInLine * charWidth,
+            textareaRect.top + padding + lineNumber * lineHeight,
+            selectedText.length * charWidth,
             lineHeight
           );
+          console.log("Calculated selection rect:", selectionRect);
         }
       }
     }
 
-    if (!selectedText || selectedText.length < 2) {
+    if (!selectedText || selectedText.length < 1) {
       console.log("No text selected or text too short:", selectedText);
-      // Clear any existing translation
       setTranslation(null);
       return false;
     }
 
-    console.log("Translating selected text:", selectedText);
+    console.log("Attempting to translate:", selectedText);
 
-    const translationResult = await translateWord(selectedText);
-    if (translationResult && selectionRect) {
-      setTranslation({
-        word: selectedText,
-        translation: translationResult.translatedText,
-        sourceLanguage: translationResult.sourceLanguage,
-        targetLanguage: translationResult.targetLanguage,
-        position: {
+    try {
+      const translationResult = await translateWord(selectedText);
+      console.log("Translation result:", translationResult);
+      
+      if (translationResult) {
+        // Use a default position if selectionRect is null
+        const position = selectionRect ? {
           x: selectionRect.left + selectionRect.width / 2,
           y: selectionRect.top
-        }
-      });
-      console.log("Translation successful:", translationResult);
-      return true;
-    } else {
-      console.log("Translation failed or no position available");
+        } : {
+          x: window.innerWidth / 2,
+          y: 100
+        };
+        
+        console.log("Using position:", position);
+        
+        setTranslation({
+          word: selectedText,
+          translation: translationResult.translatedText,
+          sourceLanguage: translationResult.sourceLanguage,
+          targetLanguage: translationResult.targetLanguage,
+          position
+        });
+        console.log("Translation successful and state updated");
+        return true;
+      } else {
+        console.log("No translation found for:", selectedText);
+        setTranslation(null);
+        return false;
+      }
+    } catch (error) {
+      console.error("Translation error:", error);
       setTranslation(null);
       return false;
     }
   }, [textareaRef]);
 
   const handleTextSelect = async (selectedText: string, position: { x: number; y: number }) => {
-    if (!selectedText || selectedText.length < 2) {
+    if (!selectedText || selectedText.length < 1) {
       setTranslation(null);
       return;
     }
@@ -146,7 +174,7 @@ export const useTranslation = (textareaRef: React.RefObject<HTMLTextAreaElement>
 
       const selectedText = selection.toString().trim();
       
-      if (!selectedText || selectedText.length < 2) {
+      if (!selectedText || selectedText.length < 1) {
         setTranslation(null);
         return;
       }

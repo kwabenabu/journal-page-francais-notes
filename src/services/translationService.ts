@@ -1,4 +1,3 @@
-
 interface TranslationResult {
   translatedText: string;
   sourceLanguage: 'en' | 'fr';
@@ -55,6 +54,14 @@ const translations: Record<string, { en: string; fr: string }> = {
   'demain': { en: 'tomorrow', fr: 'demain' },
   'yesterday': { en: 'yesterday', fr: 'hier' },
   'hier': { en: 'yesterday', fr: 'hier' },
+  'happy': { en: 'happy', fr: 'heureux' },
+  'heureux': { en: 'happy', fr: 'heureux' },
+  'sad': { en: 'sad', fr: 'triste' },
+  'triste': { en: 'sad', fr: 'triste' },
+  'big': { en: 'big', fr: 'grand' },
+  'grand': { en: 'big', fr: 'grand' },
+  'small': { en: 'small', fr: 'petit' },
+  'petit': { en: 'small', fr: 'petit' },
   
   // Common phrases
   'how are you': { en: 'how are you', fr: 'comment allez-vous' },
@@ -98,7 +105,7 @@ function detectLanguage(text: string): 'en' | 'fr' {
   const lowerText = text.toLowerCase().trim();
   
   // Check if it's a known French word/phrase
-  const frenchWords = ['bonjour', 'bon', 'oui', 'non', 'merci', 'eau', 'nourriture', 'maison', 'amour', 'beau', 'temps', 'jour', 'nuit', 'ami', 'travail', 'école', 'livre', 'écrire', 'lire', 'penser', 'aujourd\'hui', 'demain', 'hier'];
+  const frenchWords = ['bonjour', 'bon', 'oui', 'non', 'merci', 'eau', 'nourriture', 'maison', 'amour', 'beau', 'temps', 'jour', 'nuit', 'ami', 'travail', 'école', 'livre', 'écrire', 'lire', 'penser', 'aujourd\'hui', 'demain', 'hier', 'heureux', 'triste', 'grand', 'petit'];
   const frenchPhrases = ['comment allez-vous', 'comment ça va', 'merci beaucoup', 'excusez-moi', 'je t\'aime', 'bonsoir', 'bonne nuit', 'à bientôt', 'quelle heure est-il', 'je vais bien', 'comment vous appelez-vous', 'd\'où venez-vous', 'je ne comprends pas', 'parlez-vous anglais', 'je parle français', 'où sont les toilettes'];
   
   // Check for exact matches first
@@ -125,6 +132,8 @@ export function translateWord(text: string): TranslationResult | null {
     .replace(/[.,!?;:"'()]/g, '')
     .trim();
   
+  console.log("Looking up translation for:", cleanText);
+  
   // Try exact match first
   let translation = translations[cleanText];
   
@@ -135,15 +144,19 @@ export function translateWord(text: string): TranslationResult | null {
     );
     if (matchingKey) {
       translation = translations[matchingKey];
+      console.log("Found partial match:", matchingKey);
     }
   }
   
   if (!translation) {
+    console.log("No translation found for:", cleanText);
     return null;
   }
   
   const sourceLanguage = detectLanguage(cleanText);
   const targetLanguage = sourceLanguage === 'en' ? 'fr' : 'en';
+  
+  console.log("Translation found:", translation[targetLanguage]);
   
   return {
     translatedText: translation[targetLanguage],
