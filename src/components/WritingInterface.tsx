@@ -61,7 +61,7 @@ const WritingInterface = () => {
   };
 
   useEffect(() => {
-    const handleSelectionChange = () => {
+    const handleSelectionChange = async () => {
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) {
         setTranslation(null);
@@ -84,7 +84,7 @@ const WritingInterface = () => {
         return;
       }
 
-      const translationResult = translateWord(selectedText);
+      const translationResult = await translateWord(selectedText);
       if (translationResult) {
         const rect = range.getBoundingClientRect();
         setTranslation({
