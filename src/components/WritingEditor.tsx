@@ -12,7 +12,7 @@ interface WritingEditorProps {
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   onContentChange: (content: string) => void;
   onSave: () => void;
-  onTranslate: () => void;
+  onTranslate: () => Promise<boolean> | boolean;
 }
 
 const WritingEditor = ({ 
