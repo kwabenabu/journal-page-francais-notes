@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Mail, Lock, User } from "lucide-react";
+import { useLanguage } from "../contexts/LanguageContext";
+import LanguageToggle from "../components/LanguageToggle";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,6 +13,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -45,13 +48,13 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        setMessage("Vérifiez votre email pour confirmer votre inscription !");
+        setMessage(t('auth.checkEmail'));
       }
     } catch (error: any) {
       if (error.message.includes("User already registered")) {
-        setMessage("Cet email est déjà utilisé. Essayez de vous connecter.");
+        setMessage(t('auth.emailInUse'));
       } else if (error.message.includes("Invalid login credentials")) {
-        setMessage("Email ou mot de passe incorrect.");
+        setMessage(t('auth.invalidCredentials'));
       } else {
         setMessage(error.message);
       }
@@ -64,19 +67,25 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-8">
         <div className="text-center mb-8">
-          <BookOpen className="w-12 h-12 text-amber-600 mx-auto mb-4" />
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex-1" />
+            <BookOpen className="w-12 h-12 text-amber-600 mx-auto" />
+            <div className="flex-1 flex justify-end">
+              <LanguageToggle />
+            </div>
+          </div>
           <h1 className="text-2xl font-serif font-bold text-gray-800">
-            Mon Journal
+            {t('auth.title')}
           </h1>
           <p className="text-gray-600 text-sm">
-            {isLogin ? "Connectez-vous à votre journal" : "Créez votre compte"}
+            {isLogin ? t('auth.loginSubtitle') : t('auth.signupSubtitle')}
           </p>
         </div>
 
         <form onSubmit={handleAuth} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
+              {t('auth.email')}
             </label>
             <div className="relative">
               <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
@@ -86,14 +95,14 @@ const Auth = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                placeholder="votre@email.com"
+                placeholder={t('auth.emailPlaceholder')}
               />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mot de passe
+              {t('auth.password')}
             </label>
             <div className="relative">
               <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
@@ -103,7 +112,7 @@ const Auth = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder')}
                 minLength={6}
               />
             </div>
@@ -111,7 +120,7 @@ const Auth = () => {
 
           {message && (
             <div className={`p-3 rounded-lg text-sm ${
-              message.includes("Vérifiez") 
+              message.includes(t('auth.checkEmail')) 
                 ? "bg-green-50 text-green-700 border border-green-200" 
                 : "bg-red-50 text-red-700 border border-red-200"
             }`}>
@@ -129,7 +138,7 @@ const Auth = () => {
             ) : (
               <>
                 <User className="w-5 h-5" />
-                <span>{isLogin ? "Se connecter" : "S'inscrire"}</span>
+                <span>{isLogin ? t('auth.signIn') : t('auth.signUp')}</span>
               </>
             )}
           </button>
@@ -143,10 +152,7 @@ const Auth = () => {
             }}
             className="text-amber-600 hover:text-amber-700 text-sm font-medium"
           >
-            {isLogin 
-              ? "Pas de compte ? Créez-en un" 
-              : "Déjà un compte ? Connectez-vous"
-            }
+            {isLogin ? t('auth.noAccount') : t('auth.hasAccount')}
           </button>
         </div>
       </div>

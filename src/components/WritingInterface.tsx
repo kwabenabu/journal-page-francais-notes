@@ -1,9 +1,10 @@
-
 import { useState, useRef, useEffect } from "react";
 import { translateWord } from "../services/translationService";
 import { journalService, JournalEntry } from "../services/journalService";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import TranslationTooltip from "./TranslationTooltip";
+import LanguageToggle from "./LanguageToggle";
 import { Save, LogOut, BookOpen, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +25,7 @@ const WritingInterface = () => {
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -164,17 +166,18 @@ const WritingInterface = () => {
           <div className="flex items-center space-x-3">
             <BookOpen className="w-8 h-8 text-amber-600" />
             <div>
-              <h1 className="text-2xl font-serif font-bold text-gray-800">Mon Journal</h1>
-              <p className="text-sm text-gray-600">Bienvenue, {user.email}</p>
+              <h1 className="text-2xl font-serif font-bold text-gray-800">{t('journal.title')}</h1>
+              <p className="text-sm text-gray-600">{t('journal.welcome')}, {user.email}</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
+            <LanguageToggle />
             <button
               onClick={createNewEntry}
               className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2"
             >
               <FileText className="w-4 h-4" />
-              <span>Nouvelle entrée</span>
+              <span>{t('journal.newEntry')}</span>
             </button>
             <button
               onClick={handleSignOut}
@@ -189,7 +192,7 @@ const WritingInterface = () => {
       <div className="max-w-6xl mx-auto p-6 flex gap-6">
         {/* Sidebar - Journal Entries */}
         <div className="w-1/3 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Mes entrées</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('journal.myEntries')}</h2>
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {entries.map((entry) => (
               <div
@@ -214,13 +217,13 @@ const WritingInterface = () => {
                   }}
                   className="text-red-500 hover:text-red-700 text-xs mt-2"
                 >
-                  Supprimer
+                  {t('journal.delete')}
                 </button>
               </div>
             ))}
             {entries.length === 0 && (
               <div className="text-gray-500 text-center py-8">
-                Aucune entrée encore. Créez votre première entrée !
+                {t('journal.noEntries')}
               </div>
             )}
           </div>
@@ -230,12 +233,12 @@ const WritingInterface = () => {
         <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-xl font-serif font-bold text-gray-800">
-              {currentEntry ? "Modifier l'entrée" : "Nouvelle entrée"}
+              {currentEntry ? t('journal.editEntry') : t('journal.newEntryTitle')}
             </h2>
             <div className="flex items-center space-x-4">
               {lastSaved && (
                 <span className="text-sm text-gray-500">
-                  Sauvegardé à {lastSaved.toLocaleTimeString('fr-FR')}
+                  {t('journal.savedAt')} {lastSaved.toLocaleTimeString('fr-FR')}
                 </span>
               )}
               <button
@@ -244,26 +247,26 @@ const WritingInterface = () => {
                 className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2"
               >
                 <Save className="w-4 h-4" />
-                <span>{saving ? "Sauvegarde..." : "Sauvegarder"}</span>
+                <span>{saving ? t('journal.saving') : t('journal.save')}</span>
               </button>
             </div>
           </div>
           
           <p className="text-sm text-gray-600 mb-6">
-            Écrivez en français ou en anglais. Surlignez un mot pour voir sa traduction.
+            {t('journal.instructions')}
           </p>
           
           <textarea
             ref={textareaRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Commencez à écrire votre entrée de journal ici... Start writing your journal entry here..."
+            placeholder={t('journal.placeholder')}
             className="w-full h-96 p-6 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-gray-800 leading-relaxed"
             style={{ fontFamily: 'inherit' }}
           />
           
           <div className="mt-4 text-xs text-gray-500">
-            {content.length} caractères
+            {content.length} {t('journal.characters')}
           </div>
         </div>
       </div>
