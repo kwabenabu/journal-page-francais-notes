@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { translateWord } from "../services/translationService";
+import { translateWord } from "../services/realTimeTranslationService";
 import { journalService, JournalEntry } from "../services/journalService";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import TranslationTooltip from "./TranslationTooltip";
+import SmartTextSelector from "./SmartTextSelector";
 import LanguageToggle from "./LanguageToggle";
 import { Save, LogOut, BookOpen, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +15,6 @@ const WritingInterface = () => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [selectedText, setSelectedText] = useState("");
   const [translation, setTranslation] = useState<{
     word: string;
     translation: string;
@@ -36,6 +36,30 @@ const WritingInterface = () => {
     loadEntries();
   }, [user, navigate]);
 
+  const handleTextSelect = async (selectedText: string, position: { x: number; y: number }) => {
+    if (!selectedText || selectedText.length < 2) {
+      setTranslation(null);
+      return;
+    }
+
+    const translationResult = await translateWord(selectedText);
+    if (translationResult) {
+      setTranslation({
+        word: selectedText,
+        translation: translationResult.translatedText,
+        sourceLanguage: translationResult.sourceLanguage,
+        targetLanguage: translationResult.targetLanguage,
+        position
+      });
+    } else {
+      setTranslation(null);
+    }
+  };
+
+  const handleSelectionClear = () => {
+    setTranslation(null);
+  };
+
   useEffect(() => {
     const handleSelectionChange = () => {
       const selection = window.getSelection();
@@ -45,7 +69,9 @@ const WritingInterface = () => {
       }
 
       const selectedText = selection.toString().trim();
-      if (!selectedText || selectedText.includes(' ')) {
+      
+      // Now support multi-word selections (removed single word restriction)
+      if (!selectedText || selectedText.length < 2) {
         setTranslation(null);
         return;
       }
@@ -160,6 +186,12 @@ const WritingInterface = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SmartTextSelector
+        onTextSelect={handleTextSelect}
+        onSelectionClear={handleSelectionClear}
+        textareaRef={textareaRef}
+      />
+      
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -253,7 +285,7 @@ const WritingInterface = () => {
           </div>
           
           <p className="text-sm text-gray-600 mb-6">
-            {t('journal.instructions')}
+            {t('journal.instructions')} Double-click any word or phrase to auto-select and get instant translations.
           </p>
           
           <textarea
