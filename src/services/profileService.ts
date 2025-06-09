@@ -40,7 +40,18 @@ export const profileService = {
         .eq('id', user.id)
         .single();
 
-      return { data, error };
+      if (error || !data) {
+        return { data: null, error };
+      }
+
+      // Type cast the data to ensure proper typing
+      const profile: UserProfile = {
+        ...data,
+        theme_preference: data.theme_preference as 'light' | 'dark' | 'auto',
+        language_preference: data.language_preference as 'en' | 'fr'
+      };
+
+      return { data: profile, error: null };
     } catch (error) {
       console.error("Error fetching profile:", error);
       return { data: null, error };
@@ -65,7 +76,18 @@ export const profileService = {
         .select()
         .single();
 
-      return { data, error };
+      if (error || !data) {
+        return { data: null, error };
+      }
+
+      // Type cast the data to ensure proper typing
+      const profile: UserProfile = {
+        ...data,
+        theme_preference: data.theme_preference as 'light' | 'dark' | 'auto',
+        language_preference: data.language_preference as 'en' | 'fr'
+      };
+
+      return { data: profile, error: null };
     } catch (error) {
       console.error("Error updating profile:", error);
       return { data: null, error };

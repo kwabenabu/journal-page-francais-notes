@@ -1,16 +1,17 @@
 
 import { JournalEntry } from "../services/journalService";
 import { useLanguage } from "../contexts/LanguageContext";
-import { Star, Trash2 } from "lucide-react";
+import { Star, Trash2, Plus } from "lucide-react";
 
 interface JournalSidebarProps {
   entries: JournalEntry[];
   currentEntry: JournalEntry | null;
   onLoadEntry: (entry: JournalEntry) => void;
   onDeleteEntry: (id: string) => void;
+  onNewEntry: () => void;
 }
 
-const JournalSidebar = ({ entries, currentEntry, onLoadEntry, onDeleteEntry }: JournalSidebarProps) => {
+const JournalSidebar = ({ entries, currentEntry, onLoadEntry, onDeleteEntry, onNewEntry }: JournalSidebarProps) => {
   const { t } = useLanguage();
 
   const getScoreColor = (score: number) => {
@@ -21,9 +22,18 @@ const JournalSidebar = ({ entries, currentEntry, onLoadEntry, onDeleteEntry }: J
 
   return (
     <div className="h-full">
-      <h2 className="text-xl font-serif font-bold text-gray-800 mb-6 pb-3 border-b border-gray-200">
-        {t('journal.myEntries')}
-      </h2>
+      <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-200">
+        <h2 className="text-xl font-serif font-bold text-gray-800">
+          {t('journal.myEntries')}
+        </h2>
+        <button
+          onClick={onNewEntry}
+          className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors flex items-center space-x-1"
+          title="New Entry"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
       <div className="space-y-4 max-h-[calc(100vh-12rem)] overflow-y-auto pr-2">
         {entries.map((entry, index) => (
           <div
