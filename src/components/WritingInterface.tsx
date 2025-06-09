@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useJournal } from "../hooks/useJournal";
 import { useTranslation } from "../hooks/useTranslation";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
+import { Plus, Search, Save, Star, FileText, Settings } from "lucide-react";
 import TranslationTooltip from "./TranslationTooltip";
 import SmartTextSelector from "./SmartTextSelector";
 import JournalSidebar from "./JournalSidebar";
