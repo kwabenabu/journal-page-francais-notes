@@ -13,7 +13,7 @@ const WritingHeader = ({ userEmail, onNewEntry, onSignOut }: WritingHeaderProps)
   const { t } = useLanguage();
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-20 shadow-sm">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <BookOpen className="w-8 h-8 text-amber-600" />
@@ -26,14 +26,14 @@ const WritingHeader = ({ userEmail, onNewEntry, onSignOut }: WritingHeaderProps)
           <LanguageToggle />
           <button
             onClick={onNewEntry}
-            className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2"
+            className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-5 h-5" />
             <span>{t('journal.newEntry')}</span>
           </button>
           <button
             onClick={onSignOut}
-            className="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            className="text-gray-600 hover:text-gray-800 p-3 rounded-lg hover:bg-gray-100 transition-all duration-200"
           >
             <LogOut className="w-5 h-5" />
           </button>

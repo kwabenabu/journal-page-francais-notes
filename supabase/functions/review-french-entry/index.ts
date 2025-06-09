@@ -34,7 +34,7 @@ serve(async (req) => {
 
     console.log('Calling OpenAI API for entry:', entryId)
     
-    // Call OpenAI API to review the French text
+    // Call OpenAI API to review the French text and provide feedback in English
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -46,16 +46,16 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `Tu es un professeur de français expérimenté. Analyse le texte suivant écrit par un apprenant et évalue:
-            1. La précision grammaticale
-            2. La richesse du vocabulaire
-            3. La structure des phrases
-            4. L'orthographe
+            content: `You are an experienced French language teacher. Analyze the following French text written by a learner and evaluate:
+            1. Grammar accuracy
+            2. Vocabulary richness
+            3. Sentence structure
+            4. Spelling
             
-            Fournis une note globale sur 100 et des suggestions d'amélioration concrètes et encourageantes.
+            Provide a score out of 100 and concrete, encouraging improvement suggestions IN ENGLISH.
             
-            Tu DOIS répondre UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou après. Format exact:
-            {"score": 85, "feedback": "Vos suggestions détaillées ici..."}`
+            You MUST respond ONLY with a valid JSON object, with no text before or after. Exact format:
+            {"score": 85, "feedback": "Your detailed suggestions here in English..."}`
           },
           {
             role: 'user',
@@ -125,7 +125,7 @@ serve(async (req) => {
         // Final fallback: provide a default response
         reviewData = {
           score: 75,
-          feedback: "Je n'ai pas pu analyser votre texte en détail, mais continuez à pratiquer votre français ! Votre effort d'écriture est apprécié."
+          feedback: "I couldn't analyze your text in detail, but keep practicing your French! Your writing effort is appreciated."
         }
         console.log('Using fallback response')
       }

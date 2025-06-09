@@ -35,50 +35,68 @@ const WritingEditor = ({
   const { t } = useLanguage();
 
   return (
-    <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-serif font-bold text-gray-800">
-          {currentEntry ? t('journal.editEntry') : t('journal.newEntryTitle')}
-        </h2>
-        <div className="flex items-center space-x-4">
-          {lastSaved && (
-            <span className="text-sm text-gray-500">
-              {t('journal.savedAt')} {lastSaved.toLocaleTimeString('fr-FR')}
-            </span>
-          )}
-          <TranslateButton onTranslate={onTranslate} />
-          <button
-            onClick={onSave}
-            disabled={saving || !content.trim()}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2"
-          >
-            <Save className="w-4 h-4" />
-            <span>{saving ? t('journal.saving') : t('journal.save')}</span>
-          </button>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      {/* Header */}
+      <div className="border-b border-gray-200 px-8 py-6 bg-gradient-to-r from-blue-50 to-red-50">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-serif font-bold text-gray-800">
+            {currentEntry ? t('journal.editEntry') : t('journal.newEntryTitle')}
+          </h2>
+          <div className="flex items-center space-x-4">
+            {lastSaved && (
+              <span className="text-sm text-gray-500 bg-white px-3 py-1 rounded-full border">
+                {t('journal.savedAt')} {lastSaved.toLocaleTimeString('fr-FR')}
+              </span>
+            )}
+            <TranslateButton onTranslate={onTranslate} />
+            <button
+              onClick={onSave}
+              disabled={saving || !content.trim()}
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              <Save className="w-5 h-5" />
+              <span>{saving ? t('journal.saving') : t('journal.save')}</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-          {error}
+      {/* Content Area */}
+      <div className="p-8">
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm animate-fade-in">
+            {error}
+          </div>
+        )}
+        
+        <p className="text-sm text-gray-600 mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <span className="font-medium text-blue-800">Writing Tips:</span> {t('journal.instructions')} 
+          Double-click any word or phrase to auto-select and get instant translations. 
+          Use <kbd className="px-2 py-1 bg-white rounded text-xs font-mono border">Ctrl+T</kbd> to translate selected text.
+        </p>
+        
+        <textarea
+          ref={textareaRef}
+          value={content}
+          onChange={(e) => onContentChange(e.target.value)}
+          placeholder={t('journal.placeholder')}
+          className="w-full h-96 p-6 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 leading-relaxed transition-all duration-200"
+          style={{ fontFamily: 'inherit' }}
+        />
+        
+        <div className="mt-4 flex justify-between items-center text-xs text-gray-500">
+          <span>{content.length} {t('journal.characters')}</span>
+          <div className="flex space-x-4">
+            <span className="flex items-center">
+              <div className="w-2 h-2 bg-blue-400 rounded-full mr-1"></div>
+              French content
+            </span>
+            <span className="flex items-center">
+              <div className="w-2 h-2 bg-red-400 rounded-full mr-1"></div>
+              English feedback
+            </span>
+          </div>
         </div>
-      )}
-      
-      <p className="text-sm text-gray-600 mb-6">
-        {t('journal.instructions')} Double-click any word or phrase to auto-select and get instant translations. Use <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Ctrl+T</kbd> to translate selected text.
-      </p>
-      
-      <textarea
-        ref={textareaRef}
-        value={content}
-        onChange={(e) => onContentChange(e.target.value)}
-        placeholder={t('journal.placeholder')}
-        className="w-full h-96 p-6 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-gray-800 leading-relaxed"
-        style={{ fontFamily: 'inherit' }}
-      />
-      
-      <div className="mt-4 text-xs text-gray-500">
-        {content.length} {t('journal.characters')}
       </div>
 
       {currentEntry && onRequestReview && (

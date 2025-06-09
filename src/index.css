@@ -93,6 +93,7 @@
     @apply bg-background text-foreground;
     position: relative;
     overflow-x: hidden;
+    font-family: 'Inter', sans-serif;
   }
 
   /* Enhanced Chrome-inspired gradients and effects */
@@ -134,5 +135,56 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  /* Enhanced animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Playful font for headers */
+  .font-playful {
+    font-family: 'Comic Neue', 'Fredoka One', cursive;
   }
 }
