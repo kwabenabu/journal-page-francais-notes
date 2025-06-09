@@ -4,6 +4,8 @@ import { BarChart3, TrendingUp, Calendar, Target, Award } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { profileService, WritingStats, UserProfile } from "../services/profileService";
 import { journalService } from "../services/journalService";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "./ui/chart";
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -55,6 +57,30 @@ const Dashboard = () => {
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     return stats.filter(stat => new Date(stat.date) >= oneWeekAgo)
                 .reduce((total, stat) => total + stat.entries_written, 0);
+  };
+
+  const getTodayWords = () => {
+    const today = new Date().toDateString();
+    const todayStat = stats.find(stat => new Date(stat.date).toDateString() === today);
+    return todayStat?.word_count || 0;
+  };
+
+  const prepareChartData = () => {
+    return stats
+      .filter(stat => stat.total_accuracy_score > 0)
+      .slice(0, 7)
+      .reverse()
+      .map(stat => ({
+        date: new Date(stat.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        score: Math.round(stat.total_accuracy_score)
+      }));
+  };
+
+  const chartConfig = {
+    score: {
+      label: "Accuracy Score",
+      color: "hsl(var(--chart-1))"
+    }
   };
 
   if (loading) {
@@ -123,8 +149,50 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Recent Activity & Goals */}
+          {/* Charts and Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Evaluation Score Chart */}
+            <div className="chrome-metallic rounded-lg p-6 shadow-lg">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Evaluation Score Trend</h3>
+              {prepareChartData().length > 0 ? (
+                <ChartContainer config={chartConfig} className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={prepareChartData()}>
+                      <XAxis 
+                        dataKey="date" 
+                        tick={{ fontSize: 12 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis 
+                        domain={[0, 100]}
+                        tick={{ fontSize: 12 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="score" 
+                        stroke="#8b5cf6" 
+                        strokeWidth={3}
+                        dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 6 }}
+                        activeDot={{ r: 8, fill: "#8b5cf6" }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Award className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                    <p>No evaluation scores yet</p>
+                    <p className="text-sm">Write entries and get them reviewed to see your progress!</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Recent Writing Activity */}
             <div className="chrome-metallic rounded-lg p-6 shadow-lg">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h3>
@@ -159,12 +227,14 @@ const Dashboard = () => {
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Writing Goals & Progress */}
+          {/* Writing Goals & Progress */}
+          <div className="mt-8">
             <div className="chrome-metallic rounded-lg p-6 shadow-lg">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Goals & Progress</h3>
               
-              <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium text-gray-600">Daily Goal</span>
@@ -176,12 +246,12 @@ const Dashboard = () => {
                     <div 
                       className="bg-amber-600 h-2 rounded-full transition-all duration-300"
                       style={{ 
-                        width: `${Math.min(100, ((stats[0]?.word_count || 0) / (profile?.writing_goal || 300)) * 100)}%` 
+                        width: `${Math.min(100, (getTodayWords() / (profile?.writing_goal || 300)) * 100)}%` 
                       }}
                     ></div>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    {stats[0]?.word_count || 0} words today
+                    {getTodayWords()} words today
                   </p>
                 </div>
 
@@ -204,16 +274,16 @@ const Dashboard = () => {
                     Target: 7 entries per week
                   </p>
                 </div>
+              </div>
 
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-200">
-                  <h4 className="font-medium text-amber-800 mb-2">Keep it up! 🎉</h4>
-                  <p className="text-sm text-amber-700">
-                    {getCurrentStreak() > 0 
-                      ? `You're on a ${getCurrentStreak()}-day writing streak!`
-                      : "Start your writing streak today!"
-                    }
-                  </p>
-                </div>
+              <div className="mt-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-200">
+                <h4 className="font-medium text-amber-800 mb-2">Keep it up! 🎉</h4>
+                <p className="text-sm text-amber-700">
+                  {getCurrentStreak() > 0 
+                    ? `You're on a ${getCurrentStreak()}-day writing streak!`
+                    : "Start your writing streak today!"
+                  }
+                </p>
               </div>
             </div>
           </div>

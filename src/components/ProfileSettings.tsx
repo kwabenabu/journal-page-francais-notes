@@ -23,38 +23,51 @@ const ProfileSettings = () => {
   }, []);
 
   const loadProfile = async () => {
-    const { data, error } = await profileService.getProfile();
-    if (error) {
-      console.error("Error loading profile:", error);
+    try {
+      const { data, error } = await profileService.getProfile();
+      if (error) {
+        console.error("Error loading profile:", error);
+        toast.error("Failed to load profile settings");
+      } else if (data) {
+        setProfile(data);
+        setFormData({
+          display_name: data.display_name || '',
+          theme_preference: data.theme_preference || 'auto',
+          language_preference: data.language_preference || 'en',
+          writing_goal: data.writing_goal || 300,
+          notifications_enabled: data.notifications_enabled !== false
+        });
+      }
+    } catch (error) {
+      console.error("Unexpected error loading profile:", error);
       toast.error("Failed to load profile settings");
-    } else if (data) {
-      setProfile(data);
-      setFormData({
-        display_name: data.display_name || '',
-        theme_preference: data.theme_preference || 'auto',
-        language_preference: data.language_preference || 'en',
-        writing_goal: data.writing_goal || 300,
-        notifications_enabled: data.notifications_enabled !== false
-      });
     }
     setLoading(false);
   };
 
   const handleSave = async () => {
     setSaving(true);
-    const { data, error } = await profileService.updateProfile(formData);
-    
-    if (error) {
-      console.error("Error updating profile:", error);
+    try {
+      console.log("Saving profile data:", formData);
+      const { data, error } = await profileService.updateProfile(formData);
+      
+      if (error) {
+        console.error("Error updating profile:", error);
+        toast.error("Failed to update profile settings");
+      } else if (data) {
+        setProfile(data);
+        toast.success("Profile settings updated successfully!");
+        console.log("Profile updated successfully:", data);
+      }
+    } catch (error) {
+      console.error("Unexpected error updating profile:", error);
       toast.error("Failed to update profile settings");
-    } else {
-      setProfile(data);
-      toast.success("Profile settings updated successfully!");
     }
     setSaving(false);
   };
 
   const handleInputChange = (field: string, value: any) => {
+    console.log(`Updating ${field} to:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -108,7 +121,7 @@ const ProfileSettings = () => {
                 </label>
                 <select
                   value={formData.theme_preference}
-                  onChange={(e) => handleInputChange('theme_preference', e.target.value)}
+                  onChange={(e) => handleInputChange('theme_preference', e.target.value as 'light' | 'dark' | 'auto')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 >
                   <option value="auto">Auto</option>
@@ -123,7 +136,7 @@ const ProfileSettings = () => {
                 </label>
                 <select
                   value={formData.language_preference}
-                  onChange={(e) => handleInputChange('language_preference', e.target.value)}
+                  onChange={(e) => handleInputChange('language_preference', e.target.value as 'en' | 'fr')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 >
                   <option value="en">English</option>
@@ -138,7 +151,7 @@ const ProfileSettings = () => {
                 <input
                   type="number"
                   value={formData.writing_goal}
-                  onChange={(e) => handleInputChange('writing_goal', parseInt(e.target.value))}
+                  onChange={(e) => handleInputChange('writing_goal', parseInt(e.target.value) || 0)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   min="50"
                   max="2000"
