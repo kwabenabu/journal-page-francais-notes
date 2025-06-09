@@ -48,20 +48,8 @@ const WritingInterface = () => {
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Spline 3D Background */}
-      <div className="spline-background">
-        <iframe 
-          src="https://my.spline.design/100followers-8UQVye39LuVUUHVvMMW6VQi9?embed" 
-          frameBorder="0" 
-          width="100%" 
-          height="100%"
-          allow="autoplay; fullscreen"
-          title="3D Background Animation"
-        />
-      </div>
-
-      {/* Main content with glass effect overlay */}
+    <div className="min-h-screen chrome-gradient">
+      {/* Main content */}
       <div className="relative z-10 min-h-screen">
         <SmartTextSelector
           onTextSelect={handleTextSelect}
@@ -75,8 +63,8 @@ const WritingInterface = () => {
           onSignOut={handleSignOut}
         />
 
-        <div className="max-w-6xl mx-auto p-6 flex gap-6">
-          <div className="glass-effect rounded-lg p-1">
+        <div className="max-w-7xl mx-auto p-6 flex gap-6">
+          <div className="w-80 chrome-metallic rounded-lg p-4 shadow-lg">
             <JournalSidebar
               entries={entries}
               currentEntry={currentEntry}
@@ -85,7 +73,7 @@ const WritingInterface = () => {
             />
           </div>
 
-          <div className="flex-1 glass-effect rounded-lg p-1">
+          <div className="flex-1 chrome-metallic rounded-lg p-6 shadow-lg">
             <WritingEditor
               content={content}
               currentEntry={currentEntry}
