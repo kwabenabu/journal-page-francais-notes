@@ -8,6 +8,7 @@ import TranslationTooltip from "./TranslationTooltip";
 import SmartTextSelector from "./SmartTextSelector";
 import JournalSidebar from "./JournalSidebar";
 import WritingEditor from "./WritingEditor";
+import DraftRecovery from "./DraftRecovery";
 
 const WritingInterface = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -19,16 +20,23 @@ const WritingInterface = () => {
     setContent,
     currentEntry,
     entries,
+    drafts,
     saving,
     lastSaved,
+    lastAutoSaved,
     reviewing,
     error,
+    showDraftRecovery,
+    autoSaveEnabled,
     saveEntry,
     createNewEntry,
     loadEntry,
     deleteEntry,
     requestFrenchReview,
-    searchEntries
+    searchEntries,
+    recoverDraft,
+    setShowDraftRecovery,
+    manualSave
   } = useJournal();
 
   const {
@@ -58,32 +66,45 @@ const WritingInterface = () => {
           textareaRef={textareaRef}
         />
 
-        <div className="max-w-7xl mx-auto p-6 flex gap-6">
-          <div className="w-80 chrome-metallic rounded-lg p-4 shadow-lg">
-            <JournalSidebar
-              entries={entries}
-              currentEntry={currentEntry}
-              onLoadEntry={loadEntry}
-              onDeleteEntry={deleteEntry}
-              onNewEntry={createNewEntry}
-              onSearch={searchEntries}
+        <div className="max-w-7xl mx-auto p-6">
+          {showDraftRecovery && (
+            <DraftRecovery
+              onRecoverDraft={recoverDraft}
+              onDismiss={() => setShowDraftRecovery(false)}
             />
-          </div>
+          )}
+          
+          <div className="flex gap-6">
+            <div className="w-80 chrome-metallic rounded-lg p-4 shadow-lg">
+              <JournalSidebar
+                entries={entries}
+                drafts={drafts}
+                currentEntry={currentEntry}
+                onLoadEntry={loadEntry}
+                onDeleteEntry={deleteEntry}
+                onNewEntry={createNewEntry}
+                onSearch={searchEntries}
+              />
+            </div>
 
-          <div className="flex-1 chrome-metallic rounded-lg p-6 shadow-lg">
-            <WritingEditor
-              content={content}
-              currentEntry={currentEntry}
-              saving={saving}
-              lastSaved={lastSaved}
-              reviewing={reviewing}
-              error={error}
-              textareaRef={textareaRef}
-              onContentChange={setContent}
-              onSave={saveEntry}
-              onTranslate={translateSelectedText}
-              onRequestReview={requestFrenchReview}
-            />
+            <div className="flex-1 chrome-metallic rounded-lg p-6 shadow-lg">
+              <WritingEditor
+                content={content}
+                currentEntry={currentEntry}
+                saving={saving}
+                lastSaved={lastSaved}
+                lastAutoSaved={lastAutoSaved}
+                reviewing={reviewing}
+                error={error}
+                autoSaveEnabled={autoSaveEnabled}
+                textareaRef={textareaRef}
+                onContentChange={setContent}
+                onSave={saveEntry}
+                onTranslate={translateSelectedText}
+                onRequestReview={requestFrenchReview}
+                onManualSave={manualSave}
+              />
+            </div>
           </div>
         </div>
       </div>

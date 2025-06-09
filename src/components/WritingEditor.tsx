@@ -1,5 +1,5 @@
 
-import { Save } from "lucide-react";
+import { Save, Cloud, CloudOff } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { JournalEntry } from "../services/journalService";
 import TranslateButton from "./TranslateButton";
@@ -10,13 +10,16 @@ interface WritingEditorProps {
   currentEntry: JournalEntry | null;
   saving: boolean;
   lastSaved: Date | null;
+  lastAutoSaved?: Date | null;
   reviewing?: boolean;
   error?: string | null;
+  autoSaveEnabled?: boolean;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   onContentChange: (content: string) => void;
   onSave: () => void;
   onTranslate: () => Promise<boolean> | boolean;
   onRequestReview?: (entryId: string, content: string) => void;
+  onManualSave?: () => void;
 }
 
 const WritingEditor = ({ 
@@ -24,38 +27,89 @@ const WritingEditor = ({
   currentEntry, 
   saving, 
   lastSaved,
+  lastAutoSaved,
   reviewing = false,
   error,
+  autoSaveEnabled = true,
   textareaRef, 
   onContentChange, 
   onSave,
   onTranslate,
-  onRequestReview
+  onRequestReview,
+  onManualSave
 }: WritingEditorProps) => {
   const { t } = useLanguage();
+
+  const isDraft = currentEntry?.is_draft;
+  const hasUnsavedChanges = content !== (currentEntry?.content || "");
+
+  const getStatusText = () => {
+    if (saving) return t('journal.saving');
+    if (isDraft) {
+      if (lastAutoSaved) {
+        return `Draft auto-saved at ${lastAutoSaved.toLocaleTimeString('fr-FR')}`;
+      }
+      return "Draft (auto-save enabled)";
+    }
+    if (lastSaved) {
+      return `${t('journal.savedAt')} ${lastSaved.toLocaleTimeString('fr-FR')}`;
+    }
+    return "Not saved";
+  };
+
+  const getStatusIcon = () => {
+    if (saving) return <Cloud className="w-4 h-4 animate-pulse" />;
+    if (autoSaveEnabled && hasUnsavedChanges) return <Cloud className="w-4 h-4 text-blue-500" />;
+    if (lastSaved || lastAutoSaved) return <Cloud className="w-4 h-4 text-green-500" />;
+    return <CloudOff className="w-4 h-4 text-gray-400" />;
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       {/* Header */}
       <div className="border-b border-gray-200 px-8 py-6 bg-gradient-to-r from-blue-50 to-red-50">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-serif font-bold text-gray-800">
-            {currentEntry ? t('journal.editEntry') : t('journal.newEntryTitle')}
-          </h2>
-          <div className="flex items-center space-x-4">
-            {lastSaved && (
-              <span className="text-sm text-gray-500 bg-white px-3 py-1 rounded-full border">
-                {t('journal.savedAt')} {lastSaved.toLocaleTimeString('fr-FR')}
-              </span>
+          <div>
+            <h2 className="text-2xl font-serif font-bold text-gray-800">
+              {currentEntry ? 
+                (isDraft ? t('journal.editDraft') : t('journal.editEntry')) : 
+                t('journal.newEntryTitle')
+              }
+            </h2>
+            {isDraft && (
+              <p className="text-sm text-blue-600 mt-1">
+                This is a draft. Click "Publish" to make it visible in your journal.
+              </p>
             )}
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 text-sm text-gray-500 bg-white px-3 py-2 rounded-full border">
+              {getStatusIcon()}
+              <span>{getStatusText()}</span>
+            </div>
+            
+            {onManualSave && hasUnsavedChanges && (
+              <button
+                onClick={onManualSave}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200"
+              >
+                Save now
+              </button>
+            )}
+            
             <TranslateButton onTranslate={onTranslate} />
+            
             <button
               onClick={onSave}
               disabled={saving || !content.trim()}
               className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
               <Save className="w-5 h-5" />
-              <span>{saving ? t('journal.saving') : t('journal.save')}</span>
+              <span>
+                {saving ? t('journal.saving') : 
+                 isDraft ? 'Publish' : 
+                 t('journal.save')}
+              </span>
             </button>
           </div>
         </div>
@@ -73,6 +127,12 @@ const WritingEditor = ({
           <span className="font-medium text-blue-800">Writing Tips:</span> {t('journal.instructions')} 
           Double-click any word or phrase to auto-select and get instant translations. 
           Use <kbd className="px-2 py-1 bg-white rounded text-xs font-mono border">Ctrl+T</kbd> to translate selected text.
+          {autoSaveEnabled && (
+            <span className="block mt-2 text-green-700">
+              <Cloud className="w-4 h-4 inline mr-1" />
+              Auto-save is enabled - your work is automatically saved as you type.
+            </span>
+          )}
         </p>
         
         <textarea
@@ -95,11 +155,17 @@ const WritingEditor = ({
               <div className="w-2 h-2 bg-red-400 rounded-full mr-1"></div>
               English feedback
             </span>
+            {isDraft && (
+              <span className="flex items-center">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full mr-1"></div>
+                Draft mode
+              </span>
+            )}
           </div>
         </div>
       </div>
 
-      {currentEntry && onRequestReview && (
+      {currentEntry && onRequestReview && !isDraft && (
         <FrenchReview 
           entry={currentEntry} 
           onRequestReview={onRequestReview}

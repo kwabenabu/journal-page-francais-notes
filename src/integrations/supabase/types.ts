@@ -74,33 +74,42 @@ export type Database = {
       }
       journals: {
         Row: {
+          auto_saved_at: string | null
           content: string | null
           created_at: string | null
           french_accuracy_score: number | null
           id: string
+          is_draft: boolean | null
           language_feedback: string | null
+          last_local_edit: string | null
           reviewed_at: string | null
           search_vector: unknown | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
+          auto_saved_at?: string | null
           content?: string | null
           created_at?: string | null
           french_accuracy_score?: number | null
           id?: string
+          is_draft?: boolean | null
           language_feedback?: string | null
+          last_local_edit?: string | null
           reviewed_at?: string | null
           search_vector?: unknown | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
+          auto_saved_at?: string | null
           content?: string | null
           created_at?: string | null
           french_accuracy_score?: number | null
           id?: string
+          is_draft?: boolean | null
           language_feedback?: string | null
+          last_local_edit?: string | null
           reviewed_at?: string | null
           search_vector?: unknown | null
           updated_at?: string | null
@@ -185,6 +194,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_save_draft: {
+        Args: { p_entry_id?: string; p_content?: string; p_user_id?: string }
+        Returns: string
+      }
+      publish_draft: {
+        Args: { p_entry_id: string }
+        Returns: boolean
+      }
       update_writing_stats: {
         Args: {
           p_user_id: string

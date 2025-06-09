@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface JournalEntry {
@@ -11,6 +10,9 @@ export interface JournalEntry {
   language_feedback?: string | null;
   reviewed_at?: string | null;
   search_vector?: any;
+  is_draft?: boolean | null;
+  auto_saved_at?: string | null;
+  last_local_edit?: string | null;
 }
 
 export const journalService = {
@@ -34,7 +36,8 @@ export const journalService = {
         .from('journals')
         .insert([{
           content,
-          user_id: user.id
+          user_id: user.id,
+          is_draft: false // Published entries are not drafts
         }])
         .select()
         .single();
@@ -52,6 +55,62 @@ export const journalService = {
     }
   },
 
+  async autoSaveDraft(entryId: string | null, content: string): Promise<{ data: { id: string } | null; error: any }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return { data: null, error: { message: "User not authenticated" } };
+      }
+
+      console.log("Auto-saving draft:", { entryId, contentLength: content.length });
+      
+      const { data, error } = await supabase.rpc('auto_save_draft', {
+        p_entry_id: entryId,
+        p_content: content,
+        p_user_id: user.id
+      });
+
+      if (error) {
+        console.error("Auto-save error:", error);
+        return { data: null, error };
+      }
+
+      console.log("Draft auto-saved successfully:", data);
+      return { data: { id: data }, error: null };
+    } catch (error) {
+      console.error("Unexpected error auto-saving draft:", error);
+      return { data: null, error };
+    }
+  },
+
+  async publishDraft(entryId: string): Promise<{ data: boolean | null; error: any }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return { data: null, error: { message: "User not authenticated" } };
+      }
+
+      console.log("Publishing draft:", entryId);
+      
+      const { data, error } = await supabase.rpc('publish_draft', {
+        p_entry_id: entryId
+      });
+
+      if (error) {
+        console.error("Publish error:", error);
+        return { data: null, error };
+      }
+
+      console.log("Draft published successfully:", data);
+      return { data, error: null };
+    } catch (error) {
+      console.error("Unexpected error publishing draft:", error);
+      return { data: null, error };
+    }
+  },
+
   async updateEntry(id: string, content: string): Promise<{ data: JournalEntry | null; error: any }> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -64,10 +123,11 @@ export const journalService = {
         .from('journals')
         .update({ 
           content,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          last_local_edit: new Date().toISOString()
         })
         .eq('id', id)
-        .eq('user_id', user.id) // Ensure user can only update their own entries
+        .eq('user_id', user.id)
         .select()
         .single();
 
@@ -93,7 +153,7 @@ export const journalService = {
       const { data, error } = await supabase
         .from('journals')
         .select('*')
-        .eq('user_id', user.id) // Only get user's own entries
+        .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
 
       if (error) {
@@ -103,6 +163,32 @@ export const journalService = {
       return { data, error };
     } catch (error) {
       console.error("Unexpected error fetching entries:", error);
+      return { data: null, error };
+    }
+  },
+
+  async getDrafts(): Promise<{ data: JournalEntry[] | null; error: any }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return { data: null, error: { message: "User not authenticated" } };
+      }
+
+      const { data, error } = await supabase
+        .from('journals')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_draft', true)
+        .order('auto_saved_at', { ascending: false });
+
+      if (error) {
+        console.error("Fetch drafts error:", error);
+      }
+
+      return { data, error };
+    } catch (error) {
+      console.error("Unexpected error fetching drafts:", error);
       return { data: null, error };
     }
   },
@@ -162,7 +248,7 @@ export const journalService = {
         .from('journals')
         .delete()
         .eq('id', id)
-        .eq('user_id', user.id); // Ensure user can only delete their own entries
+        .eq('user_id', user.id);
 
       return { error };
     } catch (error) {
