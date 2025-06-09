@@ -36,10 +36,31 @@ const TranslateButton = ({ onTranslate }: TranslateButtonProps) => {
       <button
         onClick={handleClick}
         className={`
-          bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium 
-          transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg
-          transform hover:-translate-y-0.5
-          ${isPressed ? 'scale-95 bg-blue-800' : ''}
+          interactive-button
+          bg-gradient-to-r 
+          from-blue-600 
+          to-indigo-600 
+          hover:from-blue-700 
+          hover:to-indigo-700 
+          text-white 
+          px-6 
+          py-3 
+          rounded-xl 
+          font-semibold 
+          transition-all 
+          duration-300 
+          flex 
+          items-center 
+          space-x-3 
+          shadow-lg 
+          hover:shadow-xl
+          hover:scale-105
+          active:scale-95
+          focus:outline-none
+          focus:ring-3
+          focus:ring-blue-500/30
+          focus:ring-offset-2
+          ${isPressed ? 'scale-95 shadow-md' : ''}
           disabled:bg-gray-300 disabled:cursor-not-allowed
         `}
         title="Translate selected text (Ctrl+T)"
@@ -48,7 +69,8 @@ const TranslateButton = ({ onTranslate }: TranslateButtonProps) => {
         <span>Translate</span>
       </button>
       {feedback && (
-        <div className="absolute top-full left-0 mt-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg whitespace-nowrap z-10 animate-fade-in">
+        <div className="absolute top-full left-0 mt-3 px-4 py-3 bg-gray-900/90 text-white text-sm rounded-xl whitespace-nowrap z-10 animate-fade-in backdrop-blur-sm border border-gray-700 shadow-lg">
+          <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 rotate-45"></div>
           {feedback}
         </div>
       )}

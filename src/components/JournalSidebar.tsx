@@ -66,37 +66,35 @@ const JournalSidebar = ({
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600 bg-green-100 border-green-200";
-    if (score >= 60) return "text-yellow-600 bg-yellow-100 border-yellow-200";
-    return "text-red-600 bg-red-100 border-red-200";
+    if (score >= 80) return "text-emerald-700 bg-emerald-100 border-emerald-200";
+    if (score >= 60) return "text-amber-700 bg-amber-100 border-amber-200";
+    return "text-rose-700 bg-rose-100 border-rose-200";
   };
 
   const renderEntryCard = (entry: JournalEntry, index: number, isDraft: boolean = false) => (
     <div
       key={entry.id}
       className={`
-        p-5 
-        rounded-xl 
-        border-2
+        glass-card
+        p-6 
+        rounded-2xl 
         cursor-pointer 
         transition-all 
-        duration-300
-        hover:scale-[1.02] 
-        hover:shadow-lg
-        focus:scale-[1.02] 
-        focus:shadow-lg
+        duration-500
+        hover-lift
         focus:outline-none
-        focus:ring-2
-        focus:ring-blue-500
+        focus:ring-3
+        focus:ring-blue-500/30
         focus:ring-offset-2
-        min-h-[140px]
+        min-h-[160px]
         animate-fade-in
+        group
         ${
           currentEntry?.id === entry.id
-            ? "bg-blue-50 border-blue-300 shadow-lg"
-            : "border-gray-200 bg-white hover:bg-gray-50"
+            ? "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-300 shadow-lg ring-2 ring-blue-200"
+            : "hover:bg-gradient-to-br hover:from-white hover:to-gray-50"
         }
-        ${isDraft ? "border-l-4 border-l-orange-400" : ""}
+        ${isDraft ? "border-l-4 border-l-orange-400 bg-gradient-to-br from-orange-50 to-amber-50" : ""}
       `}
       onClick={() => onLoadEntry(entry)}
       tabIndex={0}
@@ -109,32 +107,32 @@ const JournalSidebar = ({
         }
       }}
     >
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <div className="text-sm text-gray-600 font-medium">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className="text-sm text-gray-600 font-medium bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-gray-200/60">
             {new Date(entry.updated_at).toLocaleDateString('fr-FR')}
           </div>
           {isDraft && (
-            <Badge variant="outline" className="text-orange-600 border-orange-300 bg-orange-50">
+            <Badge variant="outline" className="text-orange-700 border-orange-300 bg-orange-100/80 backdrop-blur-sm">
               <Edit className="w-3 h-3 mr-1" />
               Draft
             </Badge>
           )}
         </div>
         {entry.french_accuracy_score !== null && entry.french_accuracy_score !== undefined && (
-          <div className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center space-x-1 ${getScoreColor(entry.french_accuracy_score)}`}>
-            <Star className="w-3 h-3" />
-            <span>{entry.french_accuracy_score}</span>
+          <div className={`px-3 py-2 rounded-xl text-xs font-bold border flex items-center space-x-2 backdrop-blur-sm ${getScoreColor(entry.french_accuracy_score)}`}>
+            <Star className="w-4 h-4" />
+            <span className="font-semibold">{entry.french_accuracy_score}</span>
           </div>
         )}
       </div>
       
-      <div className="text-sm text-gray-800 mb-4 leading-relaxed line-clamp-3">
+      <div className="text-sm text-gray-800 mb-5 leading-relaxed line-clamp-3 group-hover:text-gray-900 transition-colors duration-300">
         {entry.content.length > 150 ? `${entry.content.substring(0, 150)}...` : entry.content}
       </div>
       
       <div className="flex justify-between items-center">
-        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+        <span className="text-xs text-gray-500 bg-gray-100/80 backdrop-blur-sm px-3 py-2 rounded-full border border-gray-200/50">
           {entry.content.length} characters
         </span>
         <button
@@ -143,49 +141,59 @@ const JournalSidebar = ({
             onDeleteEntry(entry.id);
           }}
           className="
-            text-rose-500 
+            interactive-button
+            text-rose-600 
             hover:text-white
-            hover:bg-rose-500
+            hover:bg-gradient-to-r
+            hover:from-rose-500
+            hover:to-rose-600
             focus:text-white
-            focus:bg-rose-500
+            focus:bg-gradient-to-r
+            focus:from-rose-500
+            focus:to-rose-600
             text-xs 
             transition-all
-            duration-200
-            px-3
-            py-1.5
-            rounded-lg
-            border
+            duration-300
+            px-4
+            py-2
+            rounded-xl
+            border-2
             border-rose-200
             hover:border-rose-500
             focus:border-rose-500
             focus:outline-none
             focus:ring-2
-            focus:ring-rose-500
+            focus:ring-rose-500/30
             focus:ring-offset-1
             flex
             items-center
-            space-x-1
+            space-x-2
+            backdrop-blur-sm
+            bg-white/80
+            hover:shadow-lg
+            hover:scale-105
+            active:scale-95
           "
         >
           <Trash2 className="w-3 h-3" />
-          <span>{t('journal.delete')}</span>
+          <span className="font-medium">{t('journal.delete')}</span>
         </button>
       </div>
     </div>
   );
 
   const renderEmptyState = (isDraft: boolean = false) => (
-    <div className="text-gray-500 text-center py-12">
-      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        {isDraft ? <Edit className="w-8 h-8 text-gray-400" /> : <FileText className="w-8 h-8 text-gray-400" />}
+    <div className="text-gray-500 text-center py-16 animate-fade-in">
+      <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 animate-float">
+        {isDraft ? <Edit className="w-10 h-10 text-gray-400" /> : <FileText className="w-10 h-10 text-gray-400" />}
       </div>
-      <p className="text-lg font-serif font-bold">
+      <p className="text-xl font-serif font-bold text-gray-700 mb-2">
         {isDraft ? "No drafts found" : t('journal.noEntries')}
       </p>
-      <p className="text-sm mt-2">
+      <p className="text-sm text-gray-500 max-w-xs mx-auto">
         {isDraft 
-          ? "Your draft entries will appear here" 
-          : "Start writing your first entry!"
+          ? "Your draft entries will appear here as you write" 
+          : "Start writing your first entry to see it here!"
         }
       </p>
     </div>
@@ -193,21 +201,48 @@ const JournalSidebar = ({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
-        <h2 className="text-xl font-serif font-bold text-gray-800">
-          {t('journal.myEntries')}
-        </h2>
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200/60">
+        <div>
+          <h2 className="text-2xl font-serif font-bold text-gray-800 mb-1">
+            {t('journal.myEntries')}
+          </h2>
+          <p className="text-sm text-gray-600">Manage your writing journey</p>
+        </div>
         <button
           onClick={onNewEntry}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors flex items-center space-x-1"
-          title="New Entry"
+          className="
+            interactive-button
+            bg-gradient-to-r 
+            from-blue-600 
+            to-indigo-600 
+            hover:from-blue-700 
+            hover:to-indigo-700 
+            text-white 
+            p-3 
+            rounded-xl 
+            transition-all
+            duration-300
+            flex 
+            items-center 
+            space-x-2
+            shadow-lg
+            hover:shadow-xl
+            hover:scale-105
+            active:scale-95
+            focus:outline-none
+            focus:ring-3
+            focus:ring-blue-500/30
+            focus:ring-offset-2
+          "
+          title="Create New Entry"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
+          <span className="font-medium">New</span>
         </button>
       </div>
 
       {/* Search Bar */}
-      <div className="mb-4">
+      <div className="mb-6">
         <SearchBar 
           onSearch={handleSearch}
           placeholder="Search your entries..."
@@ -215,7 +250,7 @@ const JournalSidebar = ({
       </div>
 
       {/* Category Manager */}
-      <div className="mb-4">
+      <div className="mb-6">
         <CategoryManager 
           onCategorySelect={handleCategorySelect}
           selectedCategory={selectedCategory}
@@ -224,21 +259,27 @@ const JournalSidebar = ({
 
       {/* Tabs for Entries and Drafts */}
       <Tabs defaultValue="entries" className="flex-1 flex flex-col">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="entries" className="flex items-center space-x-2">
+        <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100/80 backdrop-blur-sm p-1 rounded-xl">
+          <TabsTrigger 
+            value="entries" 
+            className="flex items-center space-x-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all duration-300"
+          >
             <FileText className="w-4 h-4" />
-            <span>Published</span>
+            <span className="font-medium">Published</span>
             {filteredEntries.length > 0 && (
-              <Badge variant="secondary" className="ml-1">
+              <Badge variant="secondary" className="ml-1 bg-blue-100 text-blue-700 border-blue-200">
                 {filteredEntries.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="drafts" className="flex items-center space-x-2">
+          <TabsTrigger 
+            value="drafts" 
+            className="flex items-center space-x-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all duration-300"
+          >
             <Edit className="w-4 h-4" />
-            <span>Drafts</span>
+            <span className="font-medium">Drafts</span>
             {filteredDrafts.length > 0 && (
-              <Badge variant="outline" className="ml-1 text-orange-600 border-orange-300">
+              <Badge variant="outline" className="ml-1 text-orange-700 border-orange-300 bg-orange-100">
                 {filteredDrafts.length}
               </Badge>
             )}
@@ -246,14 +287,14 @@ const JournalSidebar = ({
         </TabsList>
 
         <TabsContent value="entries" className="flex-1 mt-0">
-          <div className="space-y-4 max-h-[calc(100vh-24rem)] overflow-y-auto pr-2">
+          <div className="space-y-4 max-h-[calc(100vh-28rem)] overflow-y-auto pr-2 scroll-smooth">
             {filteredEntries.map((entry, index) => renderEntryCard(entry, index, false))}
             {filteredEntries.length === 0 && renderEmptyState(false)}
           </div>
         </TabsContent>
 
         <TabsContent value="drafts" className="flex-1 mt-0">
-          <div className="space-y-4 max-h-[calc(100vh-24rem)] overflow-y-auto pr-2">
+          <div className="space-y-4 max-h-[calc(100vh-28rem)] overflow-y-auto pr-2 scroll-smooth">
             {filteredDrafts.map((draft, index) => renderEntryCard(draft, index, true))}
             {filteredDrafts.length === 0 && renderEmptyState(true)}
           </div>

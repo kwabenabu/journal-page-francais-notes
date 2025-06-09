@@ -58,40 +58,62 @@ const WritingEditor = ({
   };
 
   const getStatusIcon = () => {
-    if (saving) return <Cloud className="w-4 h-4 animate-pulse" />;
-    if (autoSaveEnabled && hasUnsavedChanges) return <Cloud className="w-4 h-4 text-blue-500" />;
-    if (lastSaved || lastAutoSaved) return <Cloud className="w-4 h-4 text-green-500" />;
+    if (saving) return <Cloud className="w-4 h-4 animate-pulse text-blue-500" />;
+    if (autoSaveEnabled && hasUnsavedChanges) return <Cloud className="w-4 h-4 text-blue-500 animate-pulse-glow" />;
+    if (lastSaved || lastAutoSaved) return <Cloud className="w-4 h-4 text-emerald-500" />;
     return <CloudOff className="w-4 h-4 text-gray-400" />;
   };
 
+  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+  const characterCount = content.length;
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="glass-card rounded-2xl shadow-lg border border-white/30 overflow-hidden">
       {/* Header */}
-      <div className="border-b border-gray-200 px-8 py-6 bg-gradient-to-r from-blue-50 to-red-50">
+      <div className="border-b border-white/20 px-8 py-6 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-serif font-bold text-gray-800">
+          <div className="animate-slide-up">
+            <h2 className="text-3xl font-serif font-bold text-gray-800 mb-2">
               {currentEntry ? 
                 (isDraft ? t('journal.editDraft') : t('journal.editEntry')) : 
                 t('journal.newEntryTitle')
               }
             </h2>
             {isDraft && (
-              <p className="text-sm text-blue-600 mt-1">
+              <p className="text-sm text-blue-700 font-medium bg-blue-100/80 backdrop-blur-sm px-3 py-1 rounded-full inline-block">
                 This is a draft. Click "Publish" to make it visible in your journal.
               </p>
             )}
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-sm text-gray-500 bg-white px-3 py-2 rounded-full border">
+          <div className="flex items-center space-x-4 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <div className="flex items-center space-x-3 text-sm text-gray-600 bg-white/80 backdrop-blur-sm px-4 py-3 rounded-xl border border-gray-200/60 shadow-sm">
               {getStatusIcon()}
-              <span>{getStatusText()}</span>
+              <span className="font-medium">{getStatusText()}</span>
             </div>
             
             {onManualSave && hasUnsavedChanges && (
               <button
                 onClick={onManualSave}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200"
+                className="
+                  interactive-button
+                  text-blue-700 
+                  hover:text-blue-800 
+                  text-sm 
+                  font-semibold 
+                  transition-all
+                  duration-300
+                  bg-blue-100/80
+                  hover:bg-blue-200/80
+                  backdrop-blur-sm
+                  px-4
+                  py-2
+                  rounded-xl
+                  border
+                  border-blue-200/60
+                  hover:border-blue-300
+                  hover:scale-105
+                  active:scale-95
+                "
               >
                 Save now
               </button>
@@ -102,7 +124,37 @@ const WritingEditor = ({
             <button
               onClick={onSave}
               disabled={saving || !content.trim()}
-              className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="
+                interactive-button
+                bg-gradient-to-r 
+                from-emerald-600 
+                to-green-600 
+                hover:from-emerald-700 
+                hover:to-green-700 
+                disabled:from-gray-300 
+                disabled:to-gray-400
+                disabled:cursor-not-allowed 
+                text-white 
+                px-8 
+                py-4 
+                rounded-xl 
+                font-semibold 
+                transition-all 
+                duration-300 
+                flex 
+                items-center 
+                space-x-3 
+                shadow-lg 
+                hover:shadow-xl 
+                hover:scale-105
+                active:scale-95
+                focus:outline-none
+                focus:ring-3
+                focus:ring-emerald-500/30
+                focus:ring-offset-2
+                disabled:hover:scale-100
+                disabled:hover:shadow-lg
+              "
             >
               <Save className="w-5 h-5" />
               <span>
@@ -118,49 +170,91 @@ const WritingEditor = ({
       {/* Content Area */}
       <div className="p-8">
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm animate-fade-in">
+          <div className="mb-6 p-5 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200/60 rounded-xl text-red-700 text-sm animate-fade-in backdrop-blur-sm">
+            <div className="font-semibold mb-1">Error</div>
             {error}
           </div>
         )}
         
-        <p className="text-sm text-gray-600 mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <span className="font-medium text-blue-800">Writing Tips:</span> {t('journal.instructions')} 
-          Double-click any word or phrase to auto-select and get instant translations. 
-          Use <kbd className="px-2 py-1 bg-white rounded text-xs font-mono border">Ctrl+T</kbd> to translate selected text.
+        <div className="mb-6 p-5 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-200/60 rounded-xl text-blue-800 text-sm backdrop-blur-sm animate-fade-in">
+          <div className="font-semibold text-blue-900 mb-2 flex items-center space-x-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <span>Writing Tips</span>
+          </div>
+          <p className="leading-relaxed">
+            {t('journal.instructions')} Double-click any word or phrase to auto-select and get instant translations. 
+            Use <kbd className="px-2 py-1 bg-white/80 rounded text-xs font-mono border border-blue-200 shadow-sm">Ctrl+T</kbd> to translate selected text.
+          </p>
           {autoSaveEnabled && (
-            <span className="block mt-2 text-green-700">
-              <Cloud className="w-4 h-4 inline mr-1" />
-              Auto-save is enabled - your work is automatically saved as you type.
-            </span>
+            <p className="mt-3 text-emerald-700 bg-emerald-50/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-emerald-200/60 inline-flex items-center space-x-2">
+              <Cloud className="w-4 h-4" />
+              <span className="font-medium">Auto-save is enabled - your work is automatically saved as you type.</span>
+            </p>
           )}
-        </p>
+        </div>
         
-        <textarea
-          ref={textareaRef}
-          value={content}
-          onChange={(e) => onContentChange(e.target.value)}
-          placeholder={t('journal.placeholder')}
-          className="w-full h-96 p-6 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 leading-relaxed transition-all duration-200"
-          style={{ fontFamily: 'inherit' }}
-        />
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            value={content}
+            onChange={(e) => onContentChange(e.target.value)}
+            placeholder={t('journal.placeholder')}
+            className="
+              w-full 
+              h-96 
+              p-8 
+              border-2 
+              border-gray-200/60 
+              rounded-2xl 
+              resize-none 
+              focus:outline-none 
+              focus:ring-3 
+              focus:ring-blue-500/30 
+              focus:border-blue-400
+              text-gray-800 
+              leading-relaxed 
+              transition-all 
+              duration-300
+              bg-white/60
+              backdrop-blur-sm
+              placeholder:text-gray-400
+              shadow-inner
+              hover:bg-white/80
+              focus:bg-white/90
+            "
+            style={{ fontFamily: 'inherit' }}
+          />
+          
+          {/* Floating word count */}
+          <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-200/60 text-xs text-gray-600 shadow-sm">
+            <div className="flex items-center space-x-3">
+              <span className="font-medium">{wordCount} words</span>
+              <span className="text-gray-400">•</span>
+              <span>{characterCount} chars</span>
+            </div>
+          </div>
+        </div>
         
-        <div className="mt-4 flex justify-between items-center text-xs text-gray-500">
-          <span>{content.length} {t('journal.characters')}</span>
-          <div className="flex space-x-4">
-            <span className="flex items-center">
-              <div className="w-2 h-2 bg-blue-400 rounded-full mr-1"></div>
-              French content
+        <div className="mt-6 flex justify-between items-center text-xs text-gray-500">
+          <div className="flex space-x-6">
+            <span className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full shadow-sm"></div>
+              <span className="font-medium">French content</span>
             </span>
-            <span className="flex items-center">
-              <div className="w-2 h-2 bg-red-400 rounded-full mr-1"></div>
-              English feedback
+            <span className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-gradient-to-r from-red-400 to-rose-500 rounded-full shadow-sm"></div>
+              <span className="font-medium">English feedback</span>
             </span>
             {isDraft && (
-              <span className="flex items-center">
-                <div className="w-2 h-2 bg-yellow-400 rounded-full mr-1"></div>
-                Draft mode
+              <span className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-sm"></div>
+                <span className="font-medium">Draft mode</span>
               </span>
             )}
+          </div>
+          
+          <div className="text-xs text-gray-500 bg-gray-100/80 backdrop-blur-sm px-3 py-2 rounded-full border border-gray-200/50">
+            Last updated: {new Date().toLocaleTimeString('fr-FR')}
           </div>
         </div>
       </div>

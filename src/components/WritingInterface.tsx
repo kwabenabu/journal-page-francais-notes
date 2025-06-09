@@ -74,8 +74,8 @@ const WritingInterface = () => {
             />
           )}
           
-          <div className="flex gap-6">
-            <div className="w-80 chrome-metallic rounded-lg p-4 shadow-lg">
+          <div className="flex gap-8 animate-fade-in">
+            <div className="w-80 chrome-metallic rounded-2xl p-6 shadow-xl animate-scale-in">
               <JournalSidebar
                 entries={entries}
                 drafts={drafts}
@@ -87,7 +87,7 @@ const WritingInterface = () => {
               />
             </div>
 
-            <div className="flex-1 chrome-metallic rounded-lg p-6 shadow-lg">
+            <div className="flex-1 animate-scale-in" style={{ animationDelay: '100ms' }}>
               <WritingEditor
                 content={content}
                 currentEntry={currentEntry}
