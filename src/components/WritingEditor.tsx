@@ -2,6 +2,9 @@
 import { Save, Cloud, CloudOff } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { JournalEntry } from "../services/journalService";
+import { EnhancedButton } from "./ui/enhanced-button";
+import { LoadingSpinner } from "./ui/loading-spinner";
+import { ProgressBar } from "./ui/progress-bar";
 import TranslateButton from "./TranslateButton";
 import FrenchReview from "./FrenchReview";
 
@@ -42,6 +45,10 @@ const WritingEditor = ({
 
   const isDraft = currentEntry?.is_draft;
   const hasUnsavedChanges = content !== (currentEntry?.content || "");
+  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+  const characterCount = content.length;
+  const readingTime = Math.ceil(wordCount / 200); // Average reading speed
+  const progressValue = Math.min((wordCount / 300) * 100, 100); // Progress towards 300 words
 
   const getStatusText = () => {
     if (saving) return t('journal.saving');
@@ -58,44 +65,44 @@ const WritingEditor = ({
   };
 
   const getStatusIcon = () => {
-    if (saving) return <Cloud className="w-4 h-4 animate-pulse text-blue-500" />;
+    if (saving) return <LoadingSpinner size="sm" className="text-blue-500" />;
     if (autoSaveEnabled && hasUnsavedChanges) return <Cloud className="w-4 h-4 text-blue-500 animate-pulse-glow" />;
     if (lastSaved || lastAutoSaved) return <Cloud className="w-4 h-4 text-emerald-500" />;
     return <CloudOff className="w-4 h-4 text-gray-400" />;
   };
 
-  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
-  const characterCount = content.length;
-
   return (
-    <div className="glass-card rounded-2xl shadow-lg border border-white/30 overflow-hidden">
+    <div className="glass-card rounded-2xl shadow-lg border border-white/30 overflow-hidden hover:shadow-xl transition-all duration-500">
       {/* Header */}
       <div className="border-b border-white/20 px-8 py-6 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div className="animate-slide-up">
-            <h2 className="text-3xl font-serif font-bold text-gray-800 mb-2">
+            <h2 className="text-3xl font-serif font-bold text-gray-800 mb-2 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text">
               {currentEntry ? 
                 (isDraft ? t('journal.editDraft') : t('journal.editEntry')) : 
                 t('journal.newEntryTitle')
               }
             </h2>
             {isDraft && (
-              <p className="text-sm text-blue-700 font-medium bg-blue-100/80 backdrop-blur-sm px-3 py-1 rounded-full inline-block">
-                This is a draft. Click "Publish" to make it visible in your journal.
-              </p>
+              <div className="flex items-center space-x-3">
+                <p className="text-sm text-blue-700 font-medium bg-blue-100/80 backdrop-blur-sm px-3 py-1 rounded-full inline-block animate-fade-in">
+                  This is a draft. Click "Publish" to make it visible in your journal.
+                </p>
+                <ProgressBar value={progressValue} className="w-32" gradient animated />
+              </div>
             )}
           </div>
           <div className="flex items-center space-x-4 animate-slide-up" style={{ animationDelay: '100ms' }}>
-            <div className="flex items-center space-x-3 text-sm text-gray-600 bg-white/80 backdrop-blur-sm px-4 py-3 rounded-xl border border-gray-200/60 shadow-sm">
+            <div className="flex items-center space-x-3 text-sm text-gray-600 bg-white/80 backdrop-blur-sm px-4 py-3 rounded-xl border border-gray-200/60 shadow-sm hover:shadow-md transition-all duration-300">
               {getStatusIcon()}
               <span className="font-medium">{getStatusText()}</span>
             </div>
             
             {onManualSave && hasUnsavedChanges && (
-              <button
+              <EnhancedButton
                 onClick={onManualSave}
+                ripple
                 className="
-                  interactive-button
                   text-blue-700 
                   hover:text-blue-800 
                   text-sm 
@@ -116,16 +123,18 @@ const WritingEditor = ({
                 "
               >
                 Save now
-              </button>
+              </EnhancedButton>
             )}
             
             <TranslateButton onTranslate={onTranslate} />
             
-            <button
+            <EnhancedButton
               onClick={onSave}
               disabled={saving || !content.trim()}
+              ripple
+              glow
+              shimmer
               className="
-                interactive-button
                 bg-gradient-to-r 
                 from-emerald-600 
                 to-green-600 
@@ -154,15 +163,16 @@ const WritingEditor = ({
                 focus:ring-offset-2
                 disabled:hover:scale-100
                 disabled:hover:shadow-lg
+                group
               "
             >
-              <Save className="w-5 h-5" />
+              {saving ? <LoadingSpinner size="sm" /> : <Save className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />}
               <span>
                 {saving ? t('journal.saving') : 
                  isDraft ? 'Publish' : 
                  t('journal.save')}
               </span>
-            </button>
+            </EnhancedButton>
           </div>
         </div>
       </div>
@@ -170,8 +180,11 @@ const WritingEditor = ({
       {/* Content Area */}
       <div className="p-8">
         {error && (
-          <div className="mb-6 p-5 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200/60 rounded-xl text-red-700 text-sm animate-fade-in backdrop-blur-sm">
-            <div className="font-semibold mb-1">Error</div>
+          <div className="mb-6 p-5 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200/60 rounded-xl text-red-700 text-sm animate-fade-in backdrop-blur-sm hover:shadow-md transition-all duration-300">
+            <div className="font-semibold mb-1 flex items-center space-x-2">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <span>Error</span>
+            </div>
             {error}
           </div>
         )}
@@ -221,39 +234,52 @@ const WritingEditor = ({
               shadow-inner
               hover:bg-white/80
               focus:bg-white/90
+              hover:shadow-lg
+              focus:shadow-xl
             "
             style={{ fontFamily: 'inherit' }}
           />
           
-          {/* Floating word count */}
-          <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-200/60 text-xs text-gray-600 shadow-sm">
-            <div className="flex items-center space-x-3">
-              <span className="font-medium">{wordCount} words</span>
+          {/* Enhanced floating stats */}
+          <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-3 rounded-xl border border-gray-200/60 text-xs text-gray-600 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="font-medium">{wordCount} words</span>
+              </div>
               <span className="text-gray-400">•</span>
-              <span>{characterCount} chars</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>{characterCount} chars</span>
+              </div>
+              <span className="text-gray-400">•</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span>{readingTime} min read</span>
+              </div>
             </div>
           </div>
         </div>
         
         <div className="mt-6 flex justify-between items-center text-xs text-gray-500">
           <div className="flex space-x-6">
-            <span className="flex items-center space-x-2">
+            <span className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
               <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full shadow-sm"></div>
               <span className="font-medium">French content</span>
             </span>
-            <span className="flex items-center space-x-2">
+            <span className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
               <div className="w-3 h-3 bg-gradient-to-r from-red-400 to-rose-500 rounded-full shadow-sm"></div>
               <span className="font-medium">English feedback</span>
             </span>
             {isDraft && (
-              <span className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-sm"></div>
+              <span className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
+                <div className="w-3 h-3 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-sm animate-pulse"></div>
                 <span className="font-medium">Draft mode</span>
               </span>
             )}
           </div>
           
-          <div className="text-xs text-gray-500 bg-gray-100/80 backdrop-blur-sm px-3 py-2 rounded-full border border-gray-200/50">
+          <div className="text-xs text-gray-500 bg-gray-100/80 backdrop-blur-sm px-3 py-2 rounded-full border border-gray-200/50 hover:shadow-md transition-all duration-300">
             Last updated: {new Date().toLocaleTimeString('fr-FR')}
           </div>
         </div>
