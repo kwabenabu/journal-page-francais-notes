@@ -22,10 +22,12 @@ const WritingInterface = () => {
     entries,
     saving,
     lastSaved,
+    reviewing,
     saveEntry,
     createNewEntry,
     loadEntry,
-    deleteEntry
+    deleteEntry,
+    requestFrenchReview
   } = useJournal();
 
   const {
@@ -72,10 +74,12 @@ const WritingInterface = () => {
           currentEntry={currentEntry}
           saving={saving}
           lastSaved={lastSaved}
+          reviewing={reviewing}
           textareaRef={textareaRef}
           onContentChange={setContent}
           onSave={saveEntry}
           onTranslate={translateSelectedText}
+          onRequestReview={requestFrenchReview}
         />
       </div>
 

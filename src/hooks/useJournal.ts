@@ -10,6 +10,7 @@ export const useJournal = () => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [reviewing, setReviewing] = useState(false);
   
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -59,6 +60,33 @@ export const useJournal = () => {
     }
   };
 
+  const requestFrenchReview = async (entryId: string, content: string) => {
+    setReviewing(true);
+    try {
+      const { data, error } = await journalService.requestFrenchReview(entryId, content);
+      if (error) {
+        console.error("Error requesting review:", error);
+        return;
+      }
+      
+      if (data && data.success) {
+        // Update the entry with the new review data
+        const updatedEntry = data.data;
+        setEntries(prev => prev.map(entry => 
+          entry.id === entryId ? updatedEntry : entry
+        ));
+        
+        if (currentEntry?.id === entryId) {
+          setCurrentEntry(updatedEntry);
+        }
+      }
+    } catch (error) {
+      console.error("Error requesting review:", error);
+    } finally {
+      setReviewing(false);
+    }
+  };
+
   const createNewEntry = () => {
     setContent("");
     setCurrentEntry(null);
@@ -89,9 +117,11 @@ export const useJournal = () => {
     entries,
     saving,
     lastSaved,
+    reviewing,
     saveEntry,
     createNewEntry,
     loadEntry,
-    deleteEntry
+    deleteEntry,
+    requestFrenchReview
   };
 };

@@ -1,6 +1,7 @@
 
 import { JournalEntry } from "../services/journalService";
 import { useLanguage } from "../contexts/LanguageContext";
+import { Star } from "lucide-react";
 
 interface JournalSidebarProps {
   entries: JournalEntry[];
@@ -11,6 +12,12 @@ interface JournalSidebarProps {
 
 const JournalSidebar = ({ entries, currentEntry, onLoadEntry, onDeleteEntry }: JournalSidebarProps) => {
   const { t } = useLanguage();
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-green-600 bg-green-100";
+    if (score >= 60) return "text-yellow-600 bg-yellow-100";
+    return "text-red-600 bg-red-100";
+  };
 
   return (
     <div className="w-1/3 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
@@ -56,8 +63,16 @@ const JournalSidebar = ({ entries, currentEntry, onLoadEntry, onDeleteEntry }: J
               }
             }}
           >
-            <div className="text-sm text-gray-600 mb-2">
-              {new Date(entry.updated_at).toLocaleDateString('fr-FR')}
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm text-gray-600">
+                {new Date(entry.updated_at).toLocaleDateString('fr-FR')}
+              </div>
+              {entry.french_accuracy_score !== null && entry.french_accuracy_score !== undefined && (
+                <div className={`px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1 ${getScoreColor(entry.french_accuracy_score)}`}>
+                  <Star className="w-3 h-3" />
+                  <span>{entry.french_accuracy_score}</span>
+                </div>
+              )}
             </div>
             <div className="text-sm text-gray-800 line-clamp-2 mb-3">
               {entry.content.substring(0, 100)}...

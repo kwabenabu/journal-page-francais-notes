@@ -7,6 +7,9 @@ export interface JournalEntry {
   created_at: string;
   updated_at: string;
   user_id: string;
+  french_accuracy_score?: number | null;
+  language_feedback?: string | null;
+  reviewed_at?: string | null;
 }
 
 export const journalService = {
@@ -59,5 +62,23 @@ export const journalService = {
       .eq('id', id);
 
     return { error };
+  },
+
+  async requestFrenchReview(entryId: string, content: string): Promise<{ data: any; error: any }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('review-french-entry', {
+        body: { entryId, content }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error('Request review error:', error);
+      return { data: null, error };
+    }
   }
 };

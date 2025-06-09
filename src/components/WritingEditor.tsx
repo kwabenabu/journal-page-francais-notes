@@ -3,27 +3,32 @@ import { Save } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { JournalEntry } from "../services/journalService";
 import TranslateButton from "./TranslateButton";
+import FrenchReview from "./FrenchReview";
 
 interface WritingEditorProps {
   content: string;
   currentEntry: JournalEntry | null;
   saving: boolean;
   lastSaved: Date | null;
+  reviewing?: boolean;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   onContentChange: (content: string) => void;
   onSave: () => void;
   onTranslate: () => Promise<boolean> | boolean;
+  onRequestReview?: (entryId: string, content: string) => void;
 }
 
 const WritingEditor = ({ 
   content, 
   currentEntry, 
   saving, 
-  lastSaved, 
+  lastSaved,
+  reviewing = false,
   textareaRef, 
   onContentChange, 
   onSave,
-  onTranslate
+  onTranslate,
+  onRequestReview
 }: WritingEditorProps) => {
   const { t } = useLanguage();
 
@@ -67,6 +72,14 @@ const WritingEditor = ({
       <div className="mt-4 text-xs text-gray-500">
         {content.length} {t('journal.characters')}
       </div>
+
+      {currentEntry && onRequestReview && (
+        <FrenchReview 
+          entry={currentEntry} 
+          onRequestReview={onRequestReview}
+          isReviewing={reviewing}
+        />
+      )}
     </div>
   );
 };

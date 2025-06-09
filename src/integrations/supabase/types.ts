@@ -13,21 +13,30 @@ export type Database = {
         Row: {
           content: string | null
           created_at: string | null
+          french_accuracy_score: number | null
           id: string
+          language_feedback: string | null
+          reviewed_at: string | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
           content?: string | null
           created_at?: string | null
+          french_accuracy_score?: number | null
           id?: string
+          language_feedback?: string | null
+          reviewed_at?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
           content?: string | null
           created_at?: string | null
+          french_accuracy_score?: number | null
           id?: string
+          language_feedback?: string | null
+          reviewed_at?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
