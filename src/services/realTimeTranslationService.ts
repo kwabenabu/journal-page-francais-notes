@@ -54,13 +54,8 @@ function enhancedDetectLanguage(text: string): 'en' | 'fr' {
 async function libreTranslateAPI(text: string, sourceLang: string, targetLang: string): Promise<string | null> {
   try {
     // Get Supabase client - using the same config as the main app
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    
-    if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('Supabase configuration missing');
-      return null;
-    }
+    const supabaseUrl = "https://pyffplgkrwdgdczjuhyw.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5ZmZwbGdrcndkZ2Rjemp1aHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg5OTg1ODAsImV4cCI6MjA2NDU3NDU4MH0.9BJKjuswhdzkircoF5lzwcjcCtqpOnr-c3rPXTKRdms";
     
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     
