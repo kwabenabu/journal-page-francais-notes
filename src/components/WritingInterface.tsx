@@ -48,39 +48,57 @@ const WritingInterface = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <SmartTextSelector
-        onTextSelect={handleTextSelect}
-        onSelectionClear={handleSelectionClear}
-        textareaRef={textareaRef}
-      />
-      
-      <WritingHeader
-        userEmail={user.email}
-        onNewEntry={createNewEntry}
-        onSignOut={handleSignOut}
-      />
-
-      <div className="max-w-6xl mx-auto p-6 flex gap-6">
-        <JournalSidebar
-          entries={entries}
-          currentEntry={currentEntry}
-          onLoadEntry={loadEntry}
-          onDeleteEntry={deleteEntry}
+    <div className="min-h-screen relative">
+      {/* Spline 3D Background */}
+      <div className="spline-background">
+        <iframe 
+          src="https://my.spline.design/100followers-8UQVye39LuVUUHVvMMW6VQi9/" 
+          frameBorder="0" 
+          width="100%" 
+          height="100%"
+          title="3D Background Animation"
         />
+      </div>
 
-        <WritingEditor
-          content={content}
-          currentEntry={currentEntry}
-          saving={saving}
-          lastSaved={lastSaved}
-          reviewing={reviewing}
+      {/* Main content with glass effect overlay */}
+      <div className="relative z-10 min-h-screen">
+        <SmartTextSelector
+          onTextSelect={handleTextSelect}
+          onSelectionClear={handleSelectionClear}
           textareaRef={textareaRef}
-          onContentChange={setContent}
-          onSave={saveEntry}
-          onTranslate={translateSelectedText}
-          onRequestReview={requestFrenchReview}
         />
+        
+        <WritingHeader
+          userEmail={user.email}
+          onNewEntry={createNewEntry}
+          onSignOut={handleSignOut}
+        />
+
+        <div className="max-w-6xl mx-auto p-6 flex gap-6">
+          <div className="glass-effect rounded-lg p-1">
+            <JournalSidebar
+              entries={entries}
+              currentEntry={currentEntry}
+              onLoadEntry={loadEntry}
+              onDeleteEntry={deleteEntry}
+            />
+          </div>
+
+          <div className="flex-1 glass-effect rounded-lg p-1">
+            <WritingEditor
+              content={content}
+              currentEntry={currentEntry}
+              saving={saving}
+              lastSaved={lastSaved}
+              reviewing={reviewing}
+              textareaRef={textareaRef}
+              onContentChange={setContent}
+              onSave={saveEntry}
+              onTranslate={translateSelectedText}
+              onRequestReview={requestFrenchReview}
+            />
+          </div>
+        </div>
       </div>
 
       {translation && (
