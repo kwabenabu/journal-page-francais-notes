@@ -42,12 +42,91 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          language_preference: string | null
+          notifications_enabled: boolean | null
+          theme_preference: string | null
+          updated_at: string
+          writing_goal: number | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          language_preference?: string | null
+          notifications_enabled?: boolean | null
+          theme_preference?: string | null
+          updated_at?: string
+          writing_goal?: number | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          language_preference?: string | null
+          notifications_enabled?: boolean | null
+          theme_preference?: string | null
+          updated_at?: string
+          writing_goal?: number | null
+        }
+        Relationships: []
+      }
+      writing_stats: {
+        Row: {
+          created_at: string
+          date: string
+          entries_written: number | null
+          id: string
+          streak_count: number | null
+          total_accuracy_score: number | null
+          updated_at: string
+          user_id: string
+          word_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          entries_written?: number | null
+          id?: string
+          streak_count?: number | null
+          total_accuracy_score?: number | null
+          updated_at?: string
+          user_id: string
+          word_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          entries_written?: number | null
+          id?: string
+          streak_count?: number | null
+          total_accuracy_score?: number | null
+          updated_at?: string
+          user_id?: string
+          word_count?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_writing_stats: {
+        Args: {
+          p_user_id: string
+          p_word_count: number
+          p_accuracy_score?: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

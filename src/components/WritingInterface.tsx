@@ -6,7 +6,6 @@ import { useJournal } from "../hooks/useJournal";
 import { useTranslation } from "../hooks/useTranslation";
 import TranslationTooltip from "./TranslationTooltip";
 import SmartTextSelector from "./SmartTextSelector";
-import WritingHeader from "./WritingHeader";
 import JournalSidebar from "./JournalSidebar";
 import WritingEditor from "./WritingEditor";
 
@@ -57,12 +56,6 @@ const WritingInterface = () => {
           onSelectionClear={handleSelectionClear}
           textareaRef={textareaRef}
         />
-        
-        <WritingHeader
-          userEmail={user.email}
-          onNewEntry={createNewEntry}
-          onSignOut={handleSignOut}
-        />
 
         <div className="max-w-7xl mx-auto p-6 flex gap-6">
           <div className="w-80 chrome-metallic rounded-lg p-4 shadow-lg">
@@ -71,6 +64,7 @@ const WritingInterface = () => {
               currentEntry={currentEntry}
               onLoadEntry={loadEntry}
               onDeleteEntry={deleteEntry}
+              onNewEntry={createNewEntry}
             />
           </div>
 

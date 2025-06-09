@@ -2,10 +2,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import WritingInterface from "../components/WritingInterface";
+import HelpTutorial from "../components/HelpTutorial";
 import NavigationMenu from "../components/NavigationMenu";
 
-const Index = () => {
+const Help = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -31,10 +31,10 @@ const Index = () => {
     <div className="flex">
       <NavigationMenu />
       <div className="flex-1 lg:ml-0">
-        <WritingInterface />
+        <HelpTutorial />
       </div>
     </div>
   );
 };
 
-export default Index;
+export default Help;
