@@ -21,7 +21,26 @@ const JournalEntry = ({ id, title, content, date, onEdit }: JournalEntryProps) =
   };
 
   return (
-    <article className="bg-white border border-amber-100 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+    <article className="
+      bg-white 
+      border 
+      border-gray-200 
+      rounded-2xl 
+      p-6 
+      shadow-sm 
+      transition-all 
+      duration-[250ms] 
+      ease-[cubic-bezier(.25,.8,.25,1)]
+      hover:scale-[1.02] 
+      hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] 
+      hover:bg-[#F9F9F9]
+      focus-within:scale-[1.02] 
+      focus-within:shadow-[0_4px_20px_rgba(0,0,0,0.1)]
+      focus-within:bg-[#F9F9F9]
+      motion-reduce:transition-none
+      motion-reduce:hover:transform-none
+      motion-reduce:focus-within:transform-none
+    ">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-2 text-amber-600">
           <Calendar className="w-4 h-4" />
@@ -29,7 +48,23 @@ const JournalEntry = ({ id, title, content, date, onEdit }: JournalEntryProps) =
         </div>
         <button
           onClick={() => onEdit(id)}
-          className="text-gray-400 hover:text-amber-600 transition-colors duration-200 p-1 rounded-full hover:bg-amber-50"
+          className="
+            text-gray-400 
+            hover:text-amber-600 
+            focus:text-amber-600
+            transition-colors 
+            duration-[250ms] 
+            ease-[cubic-bezier(.25,.8,.25,1)]
+            p-2 
+            rounded-full 
+            hover:bg-amber-50
+            focus:bg-amber-50
+            focus:outline-none
+            focus:ring-2
+            focus:ring-amber-500
+            focus:ring-offset-2
+          "
+          aria-label="Modifier cette entrée"
         >
           <Edit3 className="w-4 h-4" />
         </button>
@@ -48,7 +83,20 @@ const JournalEntry = ({ id, title, content, date, onEdit }: JournalEntryProps) =
       {content.length > 200 && (
         <button
           onClick={() => onEdit(id)}
-          className="mt-3 text-amber-600 hover:text-amber-700 text-sm font-medium transition-colors duration-200"
+          className="
+            mt-3 
+            text-amber-600 
+            hover:text-amber-700 
+            focus:text-amber-700
+            text-sm 
+            font-medium 
+            transition-colors 
+            duration-[250ms] 
+            ease-[cubic-bezier(.25,.8,.25,1)]
+            focus:outline-none
+            focus:underline
+            underline-offset-2
+          "
         >
           Lire la suite →
         </button>
