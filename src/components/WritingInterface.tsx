@@ -52,10 +52,11 @@ const WritingInterface = () => {
       {/* Spline 3D Background */}
       <div className="spline-background">
         <iframe 
-          src="https://my.spline.design/100followers-8UQVye39LuVUUHVvMMW6VQi9/" 
+          src="https://my.spline.design/100followers-8UQVye39LuVUUHVvMMW6VQi9?embed" 
           frameBorder="0" 
           width="100%" 
           height="100%"
+          allow="autoplay; fullscreen"
           title="3D Background Animation"
         />
       </div>
