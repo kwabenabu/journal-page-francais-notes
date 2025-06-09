@@ -11,6 +11,7 @@ interface WritingEditorProps {
   saving: boolean;
   lastSaved: Date | null;
   reviewing?: boolean;
+  error?: string | null;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   onContentChange: (content: string) => void;
   onSave: () => void;
@@ -24,6 +25,7 @@ const WritingEditor = ({
   saving, 
   lastSaved,
   reviewing = false,
+  error,
   textareaRef, 
   onContentChange, 
   onSave,
@@ -55,6 +57,12 @@ const WritingEditor = ({
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {error}
+        </div>
+      )}
       
       <p className="text-sm text-gray-600 mb-6">
         {t('journal.instructions')} Double-click any word or phrase to auto-select and get instant translations. Use <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Ctrl+T</kbd> to translate selected text.

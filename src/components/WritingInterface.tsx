@@ -23,6 +23,7 @@ const WritingInterface = () => {
     saving,
     lastSaved,
     reviewing,
+    error,
     saveEntry,
     createNewEntry,
     loadEntry,
@@ -80,6 +81,7 @@ const WritingInterface = () => {
               saving={saving}
               lastSaved={lastSaved}
               reviewing={reviewing}
+              error={error}
               textareaRef={textareaRef}
               onContentChange={setContent}
               onSave={saveEntry}
