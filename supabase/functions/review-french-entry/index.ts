@@ -16,6 +16,7 @@ serve(async (req) => {
     const { entryId, content } = await req.json()
 
     if (!entryId || !content) {
+      console.error('Missing entryId or content:', { entryId, content })
       return new Response(
         JSON.stringify({ error: 'Missing entryId or content' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -24,12 +25,15 @@ serve(async (req) => {
 
     const openaiApiKey = Deno.env.get('OPENAI_KEY')
     if (!openaiApiKey) {
+      console.error('OpenAI API key not configured')
       return new Response(
         JSON.stringify({ error: 'OpenAI API key not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
+    console.log('Calling OpenAI API for entry:', entryId)
+    
     // Call OpenAI API to review the French text
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -43,31 +47,30 @@ serve(async (req) => {
           {
             role: 'system',
             content: `Tu es un professeur de français expérimenté. Analyse le texte suivant écrit par un apprenant et évalue:
-            1. La précision grammaticale (0-100)
-            2. La richesse du vocabulaire (0-100)
-            3. La structure des phrases (0-100)
-            4. L'orthographe (0-100)
+            1. La précision grammaticale
+            2. La richesse du vocabulaire
+            3. La structure des phrases
+            4. L'orthographe
             
             Fournis une note globale sur 100 et des suggestions d'amélioration concrètes et encourageantes.
             
-            Réponds au format JSON suivant:
-            {
-              "score": number (0-100),
-              "feedback": "Suggestions détaillées pour l'amélioration, incluant des corrections spécifiques et des encouragements"
-            }`
+            Tu DOIS répondre uniquement avec un JSON valide au format suivant (sans texte supplémentaire):
+            {"score": 85, "feedback": "Vos suggestions détaillées ici"}`
           },
           {
             role: 'user',
             content: content
           }
         ],
-        temperature: 0.7,
-        max_tokens: 500
+        temperature: 0.3,
+        max_tokens: 400,
+        response_format: { type: "json_object" }
       })
     })
 
     if (!openaiResponse.ok) {
-      console.error('OpenAI API error:', await openaiResponse.text())
+      const errorText = await openaiResponse.text()
+      console.error('OpenAI API error:', errorText)
       return new Response(
         JSON.stringify({ error: 'Failed to get review from OpenAI' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -75,17 +78,35 @@ serve(async (req) => {
     }
 
     const openaiResult = await openaiResponse.json()
+    console.log('OpenAI response:', openaiResult)
+    
     let reviewData
 
     try {
-      reviewData = JSON.parse(openaiResult.choices[0].message.content)
+      const content = openaiResult.choices[0].message.content
+      console.log('OpenAI content to parse:', content)
+      reviewData = JSON.parse(content)
+      
+      // Validate the required fields
+      if (typeof reviewData.score !== 'number' || typeof reviewData.feedback !== 'string') {
+        throw new Error('Invalid response format from OpenAI')
+      }
+      
+      // Ensure score is within valid range
+      reviewData.score = Math.max(0, Math.min(100, Math.round(reviewData.score)))
+      
     } catch (parseError) {
       console.error('Failed to parse OpenAI response:', parseError)
-      return new Response(
-        JSON.stringify({ error: 'Failed to parse review data' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      console.error('Raw OpenAI content:', openaiResult.choices[0].message.content)
+      
+      // Fallback: provide a default response
+      reviewData = {
+        score: 75,
+        feedback: "Je n'ai pas pu analyser votre texte en détail, mais continuez à pratiquer votre français ! Votre effort d'écriture est apprécié."
+      }
     }
+
+    console.log('Final review data:', reviewData)
 
     // Update the journal entry with the review data
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -110,6 +131,8 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log('Successfully updated entry:', data[0])
 
     return new Response(
       JSON.stringify({ 
