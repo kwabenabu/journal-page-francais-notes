@@ -1,5 +1,6 @@
 
 import { translateWord as staticTranslateWord } from './translationService';
+import { createClient } from '@supabase/supabase-js';
 
 interface TranslationResult {
   translatedText: string;
@@ -7,19 +8,7 @@ interface TranslationResult {
   targetLanguage: 'en' | 'fr';
 }
 
-// Fallback to Google Translate API (would require API key in production)
-async function googleTranslateAPI(text: string, sourceLang: string, targetLang: string): Promise<string | null> {
-  try {
-    // This would be the actual Google Translate API call
-    // For now, we'll return null to fall back to static dictionary
-    return null;
-  } catch (error) {
-    console.error('Google Translate API error:', error);
-    return null;
-  }
-}
-
-// Enhanced translation with better language detection
+// Enhanced language detection
 function enhancedDetectLanguage(text: string): 'en' | 'fr' {
   const lowerText = text.toLowerCase().trim();
   
@@ -61,7 +50,48 @@ function enhancedDetectLanguage(text: string): 'en' | 'fr' {
   return 'en';
 }
 
-// Enhanced phrase-aware translation
+// LibreTranslate API call using Supabase Edge Function
+async function libreTranslateAPI(text: string, sourceLang: string, targetLang: string): Promise<string | null> {
+  try {
+    // Get Supabase client - using the same config as the main app
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Supabase configuration missing');
+      return null;
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    
+    console.log('Calling LibreTranslate via edge function...');
+    
+    const { data, error } = await supabase.functions.invoke('libre-translate', {
+      body: {
+        text,
+        sourceLanguage: sourceLang,
+        targetLanguage: targetLang
+      }
+    });
+    
+    if (error) {
+      console.error('LibreTranslate edge function error:', error);
+      return null;
+    }
+    
+    if (data && data.translatedText) {
+      console.log('LibreTranslate success:', data.translatedText);
+      return data.translatedText;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('LibreTranslate API error:', error);
+    return null;
+  }
+}
+
+// Enhanced phrase-aware translation with LibreTranslate fallback
 export async function translateTextSmart(text: string): Promise<TranslationResult | null> {
   const cleanText = text.toLowerCase()
     .replace(/[.,!?;:"'()]/g, '')
@@ -69,23 +99,13 @@ export async function translateTextSmart(text: string): Promise<TranslationResul
   
   if (!cleanText || cleanText.length < 1) return null;
   
+  console.log('Starting translation for:', cleanText);
+  
   // First try static translation (fastest)
   const staticResult = staticTranslateWord(text);
   if (staticResult) {
+    console.log('Found in static dictionary:', staticResult);
     return staticResult;
-  }
-  
-  // Try real-time API translation (would require API key)
-  const sourceLanguage = enhancedDetectLanguage(cleanText);
-  const targetLanguage = sourceLanguage === 'en' ? 'fr' : 'en';
-  
-  const apiTranslation = await googleTranslateAPI(cleanText, sourceLanguage, targetLanguage);
-  if (apiTranslation) {
-    return {
-      translatedText: apiTranslation,
-      sourceLanguage,
-      targetLanguage
-    };
   }
   
   // Enhanced fallback for common patterns
@@ -105,6 +125,9 @@ export async function translateTextSmart(text: string): Promise<TranslationResul
   
   const enhancedTranslation = enhancedTranslations[cleanText];
   if (enhancedTranslation) {
+    const sourceLanguage = enhancedDetectLanguage(cleanText);
+    const targetLanguage = sourceLanguage === 'en' ? 'fr' : 'en';
+    console.log('Found in enhanced dictionary:', enhancedTranslation);
     return {
       translatedText: enhancedTranslation[targetLanguage],
       sourceLanguage,
@@ -112,6 +135,22 @@ export async function translateTextSmart(text: string): Promise<TranslationResul
     };
   }
   
+  // Try LibreTranslate API for unknown words/phrases
+  const sourceLanguage = enhancedDetectLanguage(cleanText);
+  const targetLanguage = sourceLanguage === 'en' ? 'fr' : 'en';
+  
+  console.log('Trying LibreTranslate API...');
+  const apiTranslation = await libreTranslateAPI(text, sourceLanguage, targetLanguage);
+  if (apiTranslation) {
+    console.log('LibreTranslate API success:', apiTranslation);
+    return {
+      translatedText: apiTranslation,
+      sourceLanguage,
+      targetLanguage
+    };
+  }
+  
+  console.log('No translation found for:', cleanText);
   return null;
 }
 
