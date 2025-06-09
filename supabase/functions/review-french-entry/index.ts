@@ -54,16 +54,16 @@ serve(async (req) => {
             
             Fournis une note globale sur 100 et des suggestions d'amélioration concrètes et encourageantes.
             
-            Tu DOIS répondre uniquement avec un JSON valide au format suivant (sans texte supplémentaire):
-            {"score": 85, "feedback": "Vos suggestions détaillées ici"}`
+            Tu DOIS répondre UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou après. Format exact:
+            {"score": 85, "feedback": "Vos suggestions détaillées ici..."}`
           },
           {
             role: 'user',
             content: content
           }
         ],
-        temperature: 0.3,
-        max_tokens: 400,
+        temperature: 0.1,
+        max_tokens: 300,
         response_format: { type: "json_object" }
       })
     })
@@ -83,8 +83,19 @@ serve(async (req) => {
     let reviewData
 
     try {
-      const content = openaiResult.choices[0].message.content
-      console.log('OpenAI content to parse:', content)
+      let content = openaiResult.choices[0].message.content
+      console.log('Raw OpenAI content:', content)
+      
+      // Clean the content - remove any text before the first { and after the last }
+      const firstBrace = content.indexOf('{')
+      const lastBrace = content.lastIndexOf('}')
+      
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        content = content.substring(firstBrace, lastBrace + 1)
+        console.log('Cleaned content:', content)
+      }
+      
+      // Try to parse the cleaned JSON
       reviewData = JSON.parse(content)
       
       // Validate the required fields
@@ -97,12 +108,26 @@ serve(async (req) => {
       
     } catch (parseError) {
       console.error('Failed to parse OpenAI response:', parseError)
-      console.error('Raw OpenAI content:', openaiResult.choices[0].message.content)
+      console.error('Raw OpenAI content that failed:', openaiResult.choices[0].message.content)
       
-      // Fallback: provide a default response
-      reviewData = {
-        score: 75,
-        feedback: "Je n'ai pas pu analyser votre texte en détail, mais continuez à pratiquer votre français ! Votre effort d'écriture est apprécié."
+      // Try to extract score and feedback using regex as a fallback
+      const rawContent = openaiResult.choices[0].message.content
+      const scoreMatch = rawContent.match(/"?score"?\s*:\s*(\d+)/i)
+      const feedbackMatch = rawContent.match(/"?feedback"?\s*:\s*"([^"]+)"/i)
+      
+      if (scoreMatch && feedbackMatch) {
+        reviewData = {
+          score: Math.max(0, Math.min(100, parseInt(scoreMatch[1]))),
+          feedback: feedbackMatch[1]
+        }
+        console.log('Extracted data using regex:', reviewData)
+      } else {
+        // Final fallback: provide a default response
+        reviewData = {
+          score: 75,
+          feedback: "Je n'ai pas pu analyser votre texte en détail, mais continuez à pratiquer votre français ! Votre effort d'écriture est apprécié."
+        }
+        console.log('Using fallback response')
       }
     }
 
