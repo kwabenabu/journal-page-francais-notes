@@ -10,6 +10,7 @@ export interface JournalEntry {
   french_accuracy_score?: number | null;
   language_feedback?: string | null;
   reviewed_at?: string | null;
+  search_vector?: any;
 }
 
 export const journalService = {
@@ -102,6 +103,49 @@ export const journalService = {
       return { data, error };
     } catch (error) {
       console.error("Unexpected error fetching entries:", error);
+      return { data: null, error };
+    }
+  },
+
+  async searchEntries(query: string): Promise<{ data: JournalEntry[] | null; error: any }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return { data: null, error: { message: "User not authenticated" } };
+      }
+
+      if (!query.trim()) {
+        // If no query, return all entries
+        return this.getEntries();
+      }
+
+      const { data, error } = await supabase
+        .from('journals')
+        .select('*')
+        .eq('user_id', user.id)
+        .textSearch('search_vector', `'${query.trim()}'`, {
+          type: 'websearch',
+          config: 'french'
+        })
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        console.error("Search error:", error);
+        // Fallback to simple content search if full-text search fails
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('journals')
+          .select('*')
+          .eq('user_id', user.id)
+          .ilike('content', `%${query.trim()}%`)
+          .order('updated_at', { ascending: false });
+        
+        return { data: fallbackData, error: fallbackError };
+      }
+
+      return { data, error };
+    } catch (error) {
+      console.error("Unexpected error searching entries:", error);
       return { data: null, error };
     }
   },

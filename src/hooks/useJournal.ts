@@ -12,6 +12,7 @@ export const useJournal = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [reviewing, setReviewing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -45,6 +46,28 @@ export const useJournal = () => {
     } catch (err) {
       console.error("Unexpected error loading entries:", err);
       setError("Failed to load journal entries");
+    }
+  };
+
+  const searchEntries = async (query: string) => {
+    if (!user) return;
+    
+    setIsSearching(true);
+    try {
+      const { data, error } = await journalService.searchEntries(query);
+      if (error) {
+        console.error("Error searching entries:", error);
+        setError("Failed to search entries");
+      } else if (data) {
+        console.log("Search results:", data.length);
+        setEntries(data);
+        setError(null);
+      }
+    } catch (err) {
+      console.error("Unexpected error searching entries:", err);
+      setError("Failed to search entries");
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -179,10 +202,12 @@ export const useJournal = () => {
     lastSaved,
     reviewing,
     error,
+    isSearching,
     saveEntry,
     createNewEntry,
     loadEntry,
     deleteEntry,
-    requestFrenchReview
+    requestFrenchReview,
+    searchEntries
   };
 };

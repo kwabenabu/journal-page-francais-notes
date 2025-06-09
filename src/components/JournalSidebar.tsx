@@ -1,7 +1,11 @@
 
+import { useState, useEffect } from "react";
 import { JournalEntry } from "../services/journalService";
+import { Category } from "../services/categoryService";
 import { useLanguage } from "../contexts/LanguageContext";
 import { Star, Trash2, Plus } from "lucide-react";
+import SearchBar from "./SearchBar";
+import CategoryManager from "./CategoryManager";
 
 interface JournalSidebarProps {
   entries: JournalEntry[];
@@ -9,10 +13,35 @@ interface JournalSidebarProps {
   onLoadEntry: (entry: JournalEntry) => void;
   onDeleteEntry: (id: string) => void;
   onNewEntry: () => void;
+  onSearch?: (query: string) => void;
 }
 
-const JournalSidebar = ({ entries, currentEntry, onLoadEntry, onDeleteEntry, onNewEntry }: JournalSidebarProps) => {
+const JournalSidebar = ({ 
+  entries, 
+  currentEntry, 
+  onLoadEntry, 
+  onDeleteEntry, 
+  onNewEntry,
+  onSearch
+}: JournalSidebarProps) => {
   const { t } = useLanguage();
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [filteredEntries, setFilteredEntries] = useState<JournalEntry[]>(entries);
+
+  useEffect(() => {
+    setFilteredEntries(entries);
+  }, [entries]);
+
+  const handleSearch = (query: string) => {
+    if (onSearch) {
+      onSearch(query);
+    }
+  };
+
+  const handleCategorySelect = (category: Category | null) => {
+    setSelectedCategory(category);
+    // TODO: Filter entries by category when category-entry associations are loaded
+  };
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600 bg-green-100 border-green-200";
@@ -21,8 +50,8 @@ const JournalSidebar = ({ entries, currentEntry, onLoadEntry, onDeleteEntry, onN
   };
 
   return (
-    <div className="h-full">
-      <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-200">
+    <div className="h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
         <h2 className="text-xl font-serif font-bold text-gray-800">
           {t('journal.myEntries')}
         </h2>
@@ -34,8 +63,26 @@ const JournalSidebar = ({ entries, currentEntry, onLoadEntry, onDeleteEntry, onN
           <Plus className="w-4 h-4" />
         </button>
       </div>
-      <div className="space-y-4 max-h-[calc(100vh-12rem)] overflow-y-auto pr-2">
-        {entries.map((entry, index) => (
+
+      {/* Search Bar */}
+      <div className="mb-4">
+        <SearchBar 
+          onSearch={handleSearch}
+          placeholder="Search your entries..."
+        />
+      </div>
+
+      {/* Category Manager */}
+      <div className="mb-4">
+        <CategoryManager 
+          onCategorySelect={handleCategorySelect}
+          selectedCategory={selectedCategory}
+        />
+      </div>
+
+      {/* Entries List */}
+      <div className="flex-1 space-y-4 max-h-[calc(100vh-20rem)] overflow-y-auto pr-2">
+        {filteredEntries.map((entry, index) => (
           <div
             key={entry.id}
             className={`
@@ -128,7 +175,7 @@ const JournalSidebar = ({ entries, currentEntry, onLoadEntry, onDeleteEntry, onN
             </div>
           </div>
         ))}
-        {entries.length === 0 && (
+        {filteredEntries.length === 0 && (
           <div className="text-gray-500 text-center py-12">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Star className="w-8 h-8 text-gray-400" />

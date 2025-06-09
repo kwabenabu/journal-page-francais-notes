@@ -27,7 +27,8 @@ const WritingInterface = () => {
     createNewEntry,
     loadEntry,
     deleteEntry,
-    requestFrenchReview
+    requestFrenchReview,
+    searchEntries
   } = useJournal();
 
   const {
@@ -65,6 +66,7 @@ const WritingInterface = () => {
               onLoadEntry={loadEntry}
               onDeleteEntry={deleteEntry}
               onNewEntry={createNewEntry}
+              onSearch={searchEntries}
             />
           </div>
 

@@ -9,6 +9,69 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      journal_categories: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          journal_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          journal_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          journal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_categories_journal_id_fkey"
+            columns: ["journal_id"]
+            isOneToOne: false
+            referencedRelation: "journals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journals: {
         Row: {
           content: string | null
@@ -17,6 +80,7 @@ export type Database = {
           id: string
           language_feedback: string | null
           reviewed_at: string | null
+          search_vector: unknown | null
           updated_at: string | null
           user_id: string | null
         }
@@ -27,6 +91,7 @@ export type Database = {
           id?: string
           language_feedback?: string | null
           reviewed_at?: string | null
+          search_vector?: unknown | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -37,6 +102,7 @@ export type Database = {
           id?: string
           language_feedback?: string | null
           reviewed_at?: string | null
+          search_vector?: unknown | null
           updated_at?: string | null
           user_id?: string | null
         }
