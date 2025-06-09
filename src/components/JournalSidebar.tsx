@@ -9,6 +9,7 @@ import CategoryManager from "./CategoryManager";
 
 interface JournalSidebarProps {
   entries: JournalEntry[];
+  drafts: JournalEntry[];
   currentEntry: JournalEntry | null;
   onLoadEntry: (entry: JournalEntry) => void;
   onDeleteEntry: (id: string) => void;
@@ -18,6 +19,7 @@ interface JournalSidebarProps {
 
 const JournalSidebar = ({ 
   entries, 
+  drafts,
   currentEntry, 
   onLoadEntry, 
   onDeleteEntry, 
