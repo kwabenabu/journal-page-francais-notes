@@ -1,6 +1,8 @@
 
-import { Clock, Star, MessageSquare, RefreshCw } from "lucide-react";
+import { Clock, Star, MessageSquare, RefreshCw, Languages } from "lucide-react";
+import { useState } from "react";
 import { JournalEntry } from "../services/journalService";
+import { translateLongText } from "../services/realTimeTranslationService";
 
 interface FrenchReviewProps {
   entry: JournalEntry;
@@ -9,6 +11,10 @@ interface FrenchReviewProps {
 }
 
 const FrenchReview = ({ entry, onRequestReview, isReviewing = false }: FrenchReviewProps) => {
+  const [translatedFeedback, setTranslatedFeedback] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [showTranslation, setShowTranslation] = useState(false);
+  
   const hasReview = entry.french_accuracy_score !== null && entry.french_accuracy_score !== undefined;
   
   const getScoreColor = (score: number) => {
@@ -25,6 +31,33 @@ const FrenchReview = ({ entry, onRequestReview, isReviewing = false }: FrenchRev
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const handleTranslateFeedback = async () => {
+    if (!entry.language_feedback) return;
+    
+    setIsTranslating(true);
+    try {
+      const translated = await translateLongText(entry.language_feedback, 'en');
+      if (translated) {
+        setTranslatedFeedback(translated);
+        setShowTranslation(true);
+      }
+    } catch (error) {
+      console.error('Failed to translate feedback:', error);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const toggleTranslation = () => {
+    if (showTranslation) {
+      setShowTranslation(false);
+    } else if (translatedFeedback) {
+      setShowTranslation(true);
+    } else {
+      handleTranslateFeedback();
+    }
   };
 
   return (
@@ -71,15 +104,26 @@ const FrenchReview = ({ entry, onRequestReview, isReviewing = false }: FrenchRev
 
           {entry.language_feedback && (
             <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-start space-x-2">
-                <MessageSquare className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="font-medium text-gray-800 mb-2">Suggestions d'amélioration</h4>
-                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
-                    {entry.language_feedback}
-                  </p>
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-start space-x-2">
+                  <MessageSquare className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                  <h4 className="font-medium text-gray-800">
+                    {showTranslation ? 'Improvement Suggestions (English)' : 'Suggestions d\'amélioration'}
+                  </h4>
                 </div>
+                <button
+                  onClick={toggleTranslation}
+                  disabled={isTranslating}
+                  className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                  title={showTranslation ? 'Show French' : 'Translate to English'}
+                >
+                  <Languages className={`w-4 h-4 ${isTranslating ? 'animate-spin' : ''}`} />
+                  <span>{showTranslation ? 'FR' : 'EN'}</span>
+                </button>
               </div>
+              <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
+                {showTranslation && translatedFeedback ? translatedFeedback : entry.language_feedback}
+              </p>
             </div>
           )}
         </div>

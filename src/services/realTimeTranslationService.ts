@@ -149,5 +149,26 @@ export async function translateTextSmart(text: string): Promise<TranslationResul
   return null;
 }
 
+// Function specifically for translating longer text like evaluation feedback
+export async function translateLongText(text: string, targetLanguage: 'en' | 'fr'): Promise<string | null> {
+  if (!text || text.trim().length === 0) return null;
+  
+  const sourceLanguage = enhancedDetectLanguage(text);
+  if (sourceLanguage === targetLanguage) {
+    return text; // Already in target language
+  }
+  
+  console.log('Translating long text:', text.substring(0, 50) + '...');
+  
+  const apiTranslation = await libreTranslateAPI(text, sourceLanguage, targetLanguage);
+  if (apiTranslation) {
+    console.log('Long text translation success');
+    return apiTranslation;
+  }
+  
+  console.log('Long text translation failed');
+  return null;
+}
+
 // Export the enhanced function as the main translation function
 export { translateTextSmart as translateWord };
