@@ -1,11 +1,9 @@
-
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { JournalEntry } from "../services/journalService";
-import { Category } from "../services/categoryService";
-import SearchBar from "./SearchBar";
-import CategoryManager from "./CategoryManager";
+import { useLanguage } from "../contexts/LanguageContext";
 import SidebarHeader from "./sidebar/SidebarHeader";
 import EntryTabs from "./sidebar/EntryTabs";
+import EnhancedSearch from "./EnhancedSearch";
 
 interface JournalSidebarProps {
   entries: JournalEntry[];
@@ -14,75 +12,53 @@ interface JournalSidebarProps {
   onLoadEntry: (entry: JournalEntry) => void;
   onDeleteEntry: (id: string) => void;
   onNewEntry: () => void;
-  onSearch?: (query: string) => void;
+  onSearch: (query: string) => void;
 }
 
-const JournalSidebar = ({ 
-  entries, 
+const JournalSidebar = ({
+  entries,
   drafts,
-  currentEntry, 
-  onLoadEntry, 
-  onDeleteEntry, 
+  currentEntry,
+  onLoadEntry,
+  onDeleteEntry,
   onNewEntry,
   onSearch
 }: JournalSidebarProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [filteredEntries, setFilteredEntries] = useState<JournalEntry[]>(entries);
-  const [filteredDrafts, setFilteredDrafts] = useState<JournalEntry[]>(drafts);
-  const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useLanguage();
+  const [filteredEntries, setFilteredEntries] = useState(entries);
+  const [filteredDrafts, setFilteredDrafts] = useState(drafts);
 
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      // Filter entries based on search query
-      const filtered = entries.filter(entry => 
-        entry.content.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredEntries(filtered);
-      
-      // Filter drafts based on search query
-      const filteredDraftResults = drafts.filter(draft => 
-        draft.content.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredDrafts(filteredDraftResults);
-    } else {
-      setFilteredEntries(entries);
-      setFilteredDrafts(drafts);
-    }
-  }, [entries, drafts, searchQuery]);
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (onSearch && query.trim()) {
-      onSearch(query);
-    }
+  const handleSearchResults = (results: JournalEntry[]) => {
+    const publishedResults = results.filter(entry => !entry.is_draft);
+    const draftResults = results.filter(entry => entry.is_draft);
+    
+    setFilteredEntries(publishedResults);
+    setFilteredDrafts(draftResults);
   };
 
-  const handleCategorySelect = (category: Category | null) => {
-    setSelectedCategory(category);
-    // TODO: Filter entries by category when category-entry associations are loaded
-  };
+  // Update filtered results when entries or drafts change
+  React.useEffect(() => {
+    setFilteredEntries(entries);
+  }, [entries]);
+
+  React.useEffect(() => {
+    setFilteredDrafts(drafts);
+  }, [drafts]);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col" role="complementary" aria-label="Journal sidebar">
       <SidebarHeader onNewEntry={onNewEntry} />
-
-      {/* Search Bar */}
+      
       <div className="mb-6">
-        <SearchBar 
-          onSearch={handleSearch}
-          placeholder="Search your entries..."
+        <EnhancedSearch
+          entries={entries}
+          drafts={drafts}
+          onSearch={handleSearchResults}
+          placeholder="Search entries... (Press / to focus)"
+          className="w-full"
         />
       </div>
 
-      {/* Category Manager */}
-      <div className="mb-6">
-        <CategoryManager 
-          onCategorySelect={handleCategorySelect}
-          selectedCategory={selectedCategory}
-        />
-      </div>
-
-      {/* Entry Tabs */}
       <EntryTabs
         filteredEntries={filteredEntries}
         filteredDrafts={filteredDrafts}
