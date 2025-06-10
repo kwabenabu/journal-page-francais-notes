@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { User, Save, Settings } from "lucide-react";
+import { User, Save, Settings, AlertCircle } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { profileService, UserProfile } from "../services/profileService";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ const ProfileSettings = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     display_name: '',
     theme_preference: 'auto' as 'light' | 'dark' | 'auto',
@@ -24,11 +25,18 @@ const ProfileSettings = () => {
 
   const loadProfile = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      console.log("Loading profile...");
+      
       const { data, error } = await profileService.getProfile();
+      
       if (error) {
         console.error("Error loading profile:", error);
+        setError("Failed to load profile settings. Please try refreshing the page.");
         toast.error("Failed to load profile settings");
       } else if (data) {
+        console.log("Profile loaded successfully:", data);
         setProfile(data);
         setFormData({
           display_name: data.display_name || '',
@@ -37,22 +45,35 @@ const ProfileSettings = () => {
           writing_goal: data.writing_goal || 300,
           notifications_enabled: data.notifications_enabled !== false
         });
+      } else {
+        console.warn("No profile data returned");
+        setError("Profile not found. Please try refreshing the page.");
       }
     } catch (error) {
       console.error("Unexpected error loading profile:", error);
+      setError("An unexpected error occurred while loading your profile.");
       toast.error("Failed to load profile settings");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSave = async () => {
+    if (!profile) {
+      toast.error("Profile not loaded. Please refresh and try again.");
+      return;
+    }
+
     setSaving(true);
+    setError(null);
+    
     try {
       console.log("Saving profile data:", formData);
       const { data, error } = await profileService.updateProfile(formData);
       
       if (error) {
         console.error("Error updating profile:", error);
+        setError("Failed to update profile settings. Please try again.");
         toast.error("Failed to update profile settings");
       } else if (data) {
         setProfile(data);
@@ -61,9 +82,11 @@ const ProfileSettings = () => {
       }
     } catch (error) {
       console.error("Unexpected error updating profile:", error);
+      setError("An unexpected error occurred while saving your profile.");
       toast.error("Failed to update profile settings");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleInputChange = (field: string, value: any) => {
@@ -71,10 +94,35 @@ const ProfileSettings = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleRetry = () => {
+    loadProfile();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen chrome-gradient flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile settings...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !profile) {
+    return (
+      <div className="min-h-screen chrome-gradient flex items-center justify-center">
+        <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Unable to Load Profile</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={handleRetry}
+            className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
@@ -90,6 +138,21 @@ const ProfileSettings = () => {
         </header>
 
         <div className="max-w-4xl mx-auto p-6">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
+              <AlertCircle className="w-5 h-5 text-red-500 mr-3 flex-shrink-0" />
+              <div>
+                <p className="text-red-700">{error}</p>
+                <button
+                  onClick={handleRetry}
+                  className="text-red-600 hover:text-red-800 underline mt-1 text-sm"
+                >
+                  Try refreshing the data
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="chrome-metallic rounded-lg p-8 shadow-lg">
             <div className="flex items-center space-x-4 mb-8">
               <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
