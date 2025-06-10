@@ -1,5 +1,6 @@
 
 import { ReactNode } from "react";
+import { Settings } from "lucide-react";
 import AppSidebar from "./AppSidebar";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "../contexts/AuthContext";
