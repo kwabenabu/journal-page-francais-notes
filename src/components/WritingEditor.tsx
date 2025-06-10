@@ -275,7 +275,7 @@ const WritingEditor = ({
               <span className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
                 <div className="w-3 h-3 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-sm"></div>
                 <span className="font-medium">Saves on exit</span>
-              </div>
+              </span>
             )}
           </div>
           
