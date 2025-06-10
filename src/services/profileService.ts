@@ -40,7 +40,13 @@ export const profileService = {
         .eq('id', user.id)
         .single();
 
-      if (error || !data) {
+      if (error && error.code === 'PGRST116') {
+        // No profile found, create one
+        console.log("No profile found, creating one for user:", user.id);
+        return await this.createProfile(user);
+      }
+
+      if (error) {
         return { data: null, error };
       }
 
@@ -54,6 +60,47 @@ export const profileService = {
       return { data: profile, error: null };
     } catch (error) {
       console.error("Error fetching profile:", error);
+      return { data: null, error };
+    }
+  },
+
+  async createProfile(user: any): Promise<{ data: UserProfile | null; error: any }> {
+    try {
+      const displayName = user.user_metadata?.display_name || 
+                         user.email?.split('@')[0] || 
+                         'User';
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: user.email,
+          display_name: displayName,
+          theme_preference: 'auto',
+          language_preference: 'en',
+          writing_goal: 300,
+          notifications_enabled: true
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating profile:", error);
+        return { data: null, error };
+      }
+
+      console.log("Profile created successfully:", data);
+      
+      // Type cast the data to ensure proper typing
+      const profile: UserProfile = {
+        ...data,
+        theme_preference: data.theme_preference as 'light' | 'dark' | 'auto',
+        language_preference: data.language_preference as 'en' | 'fr'
+      };
+
+      return { data: profile, error: null };
+    } catch (error) {
+      console.error("Error creating profile:", error);
       return { data: null, error };
     }
   },
@@ -76,7 +123,7 @@ export const profileService = {
         .select()
         .single();
 
-      if (error || !data) {
+      if (error) {
         return { data: null, error };
       }
 

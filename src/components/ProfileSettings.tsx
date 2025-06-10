@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { User, Save, Settings, AlertCircle } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -45,6 +44,11 @@ const ProfileSettings = () => {
           writing_goal: data.writing_goal || 300,
           notifications_enabled: data.notifications_enabled !== false
         });
+        
+        // If we just created a profile, show a success message
+        if (!profile) {
+          toast.success("Profile created successfully!");
+        }
       } else {
         console.warn("No profile data returned");
         setError("Profile not found. Please try refreshing the page.");
