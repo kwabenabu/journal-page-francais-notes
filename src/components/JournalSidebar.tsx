@@ -1,6 +1,8 @@
+
 import React, { useState } from "react";
 import { JournalEntry } from "../services/journalService";
 import { useLanguage } from "../contexts/LanguageContext";
+import { ScrollArea } from "./ui/scroll-area";
 import SidebarHeader from "./sidebar/SidebarHeader";
 import EntryTabs from "./sidebar/EntryTabs";
 import EnhancedSearch from "./EnhancedSearch";
@@ -47,25 +49,33 @@ const JournalSidebar = ({
 
   return (
     <div className="h-full flex flex-col" role="complementary" aria-label="Journal sidebar">
-      <SidebarHeader onNewEntry={onNewEntry} />
-      
-      <div className="mb-6">
-        <EnhancedSearch
-          entries={entries}
-          drafts={drafts}
-          onSearch={handleSearchResults}
-          placeholder="Search entries... (Press / to focus)"
-          className="w-full"
-        />
+      <div className="flex-shrink-0">
+        <SidebarHeader onNewEntry={onNewEntry} />
+        
+        <div className="mb-6 px-4">
+          <EnhancedSearch
+            entries={entries}
+            drafts={drafts}
+            onSearch={handleSearchResults}
+            placeholder="Search entries... (Press / to focus)"
+            className="w-full"
+          />
+        </div>
       </div>
 
-      <EntryTabs
-        filteredEntries={filteredEntries}
-        filteredDrafts={filteredDrafts}
-        currentEntry={currentEntry}
-        onLoadEntry={onLoadEntry}
-        onDeleteEntry={onDeleteEntry}
-      />
+      <div className="flex-1 min-h-0 px-4">
+        <ScrollArea className="h-full">
+          <div className="pr-4">
+            <EntryTabs
+              filteredEntries={filteredEntries}
+              filteredDrafts={filteredDrafts}
+              currentEntry={currentEntry}
+              onLoadEntry={onLoadEntry}
+              onDeleteEntry={onDeleteEntry}
+            />
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 };

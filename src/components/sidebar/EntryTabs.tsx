@@ -22,7 +22,7 @@ const EntryTabs = ({
   onDeleteEntry
 }: EntryTabsProps) => {
   return (
-    <Tabs defaultValue="entries" className="flex-1 flex flex-col">
+    <Tabs defaultValue="entries" className="flex-1 flex flex-col min-h-0">
       <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100/80 backdrop-blur-sm p-1 rounded-xl">
         <TabsTrigger 
           value="entries" 
@@ -50,8 +50,8 @@ const EntryTabs = ({
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="entries" className="flex-1 mt-0">
-        <div className="space-y-4 max-h-[calc(100vh-28rem)] overflow-y-auto pr-2 scroll-smooth">
+      <TabsContent value="entries" className="flex-1 mt-0 overflow-hidden">
+        <div className="space-y-4">
           {filteredEntries.map((entry, index) => (
             <EntryCard
               key={entry.id}
@@ -67,8 +67,8 @@ const EntryTabs = ({
         </div>
       </TabsContent>
 
-      <TabsContent value="drafts" className="flex-1 mt-0">
-        <div className="space-y-4 max-h-[calc(100vh-28rem)] overflow-y-auto pr-2 scroll-smooth">
+      <TabsContent value="drafts" className="flex-1 mt-0 overflow-hidden">
+        <div className="space-y-4">
           {filteredDrafts.map((draft, index) => (
             <EntryCard
               key={draft.id}
