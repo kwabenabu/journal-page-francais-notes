@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { ThemeProvider } from "./components/ThemeProvider";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import DashboardPage from "./pages/DashboardPage";
@@ -17,25 +18,27 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <LanguageProvider>
-          <AuthProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/help" element={<Help />} />
-              <Route path="/auth" element={<Auth />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AuthProvider>
-        </LanguageProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider defaultTheme="system" storageKey="lovable-ui-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <LanguageProvider>
+            <AuthProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/help" element={<Help />} />
+                <Route path="/auth" element={<Auth />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AuthProvider>
+          </LanguageProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
