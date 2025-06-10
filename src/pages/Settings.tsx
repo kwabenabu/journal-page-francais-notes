@@ -28,7 +28,7 @@ const Settings = () => {
   }
 
   return (
-    <AppLayout title="Profile Settings">
+    <AppLayout title="Settings">
       <ProfileSettings />
     </AppLayout>
   );
