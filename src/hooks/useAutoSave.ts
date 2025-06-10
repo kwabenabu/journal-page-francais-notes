@@ -9,7 +9,6 @@ interface UseAutoSaveOptions {
   isEnabled: boolean;
   onAutoSave?: (serverId: string) => void;
   onError?: (error: any) => void;
-  saveOnExit?: boolean; // New option to control when to save
 }
 
 export const useAutoSave = ({
@@ -17,13 +16,12 @@ export const useAutoSave = ({
   entryId,
   isEnabled,
   onAutoSave,
-  onError,
-  saveOnExit = false // Default to false for normal auto-save behavior
+  onError
 }: UseAutoSaveOptions) => {
   const lastSavedContentRef = useRef<string>('');
   const isSavingRef = useRef(false);
 
-  const performAutoSave = useCallback(async () => {
+  const performSave = useCallback(async () => {
     if (!isEnabled || isSavingRef.current || content === lastSavedContentRef.current) {
       return;
     }
@@ -38,15 +36,15 @@ export const useAutoSave = ({
 
     try {
       isSavingRef.current = true;
-      console.log('Auto-saving to server...', { entryId, contentLength: content.length });
+      console.log('Saving draft to server...', { entryId, contentLength: content.length });
       
       const { data, error } = await journalService.autoSaveDraft(entryId, content);
       
       if (error) {
-        console.error('Auto-save failed:', error);
+        console.error('Save failed:', error);
         onError?.(error);
       } else if (data?.id) {
-        console.log('Auto-save successful:', data.id);
+        console.log('Save successful:', data.id);
         lastSavedContentRef.current = content;
         
         // Update local storage with server ID
@@ -54,19 +52,15 @@ export const useAutoSave = ({
         onAutoSave?.(data.id);
       }
     } catch (error) {
-      console.error('Auto-save error:', error);
+      console.error('Save error:', error);
       onError?.(error);
     } finally {
       isSavingRef.current = false;
     }
   }, [content, entryId, isEnabled, onAutoSave, onError]);
 
-  // Set up beforeunload event to save when leaving the page
+  // Save on page unload
   useEffect(() => {
-    if (!saveOnExit || !isEnabled) {
-      return;
-    }
-
     const handleBeforeUnload = () => {
       if (content.trim().length > 0 && content !== lastSavedContentRef.current) {
         // Save to local storage immediately when leaving
@@ -74,7 +68,7 @@ export const useAutoSave = ({
         
         // Try to save to server (this may not complete due to page unload)
         if (content.trim().length >= 10) {
-          performAutoSave();
+          performSave();
         }
       }
     };
@@ -84,22 +78,23 @@ export const useAutoSave = ({
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [content, entryId, isEnabled, saveOnExit, performAutoSave]);
+  }, [content, entryId, performSave]);
+
+  // Manual save function for when leaving the page/component
+  const saveOnNavigate = useCallback(() => {
+    if (content.trim().length > 0 && content !== lastSavedContentRef.current) {
+      console.log('Saving draft on navigate...', { contentLength: content.length });
+      localStorageService.saveDraft(content, entryId || undefined);
+      if (content.trim().length >= 10) {
+        performSave();
+      }
+    }
+  }, [content, entryId, performSave]);
 
   // Manual save function
   const manualSave = useCallback(() => {
-    performAutoSave();
-  }, [performAutoSave]);
-
-  // Save on exit function for navigation changes
-  const saveOnNavigate = useCallback(() => {
-    if (content.trim().length > 0 && content !== lastSavedContentRef.current) {
-      localStorageService.saveDraft(content, entryId || undefined);
-      if (content.trim().length >= 10) {
-        performAutoSave();
-      }
-    }
-  }, [content, entryId, performAutoSave]);
+    performSave();
+  }, [performSave]);
 
   return {
     manualSave,

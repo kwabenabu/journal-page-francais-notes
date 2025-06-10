@@ -72,12 +72,11 @@ export const useJournal = () => {
     drafts
   });
 
-  // Auto-save functionality - now only saves on exit
+  // Auto-save functionality - only for saving on exit, not while typing
   const { manualSave, saveOnNavigate } = useAutoSave({
     content,
     entryId: currentEntry?.id || null,
     isEnabled: autoSaveEnabled && content.trim().length > 0,
-    saveOnExit: true, // Enable save on exit behavior
     onAutoSave: (serverId) => {
       console.log('Draft saved on exit:', serverId);
       setLastAutoSaved(new Date());
