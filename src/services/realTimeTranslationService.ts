@@ -86,7 +86,43 @@ async function libreTranslateAPI(text: string, sourceLang: string, targetLang: s
   }
 }
 
-// Enhanced phrase-aware translation with LibreTranslate fallback
+// OpenAI API call using Supabase Edge Function
+async function openAITranslateAPI(text: string, sourceLang: string, targetLang: string): Promise<string | null> {
+  try {
+    // Get Supabase client - using the same config as the main app
+    const supabaseUrl = "https://pyffplgkrwdgdczjuhyw.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5ZmZwbGdrcndkZ2Rjemp1aHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg5OTg1ODAsImV4cCI6MjA2NDU3NDU4MH0.9BJKjuswhdzkircoF5lzwcjcCtqpOnr-c3rPXTKRdms";
+    
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    
+    console.log('Calling OpenAI via edge function...');
+    
+    const { data, error } = await supabase.functions.invoke('openai-translate', {
+      body: {
+        text,
+        sourceLanguage: sourceLang,
+        targetLanguage: targetLang
+      }
+    });
+    
+    if (error) {
+      console.error('OpenAI edge function error:', error);
+      return null;
+    }
+    
+    if (data && data.translatedText) {
+      console.log('OpenAI translation success:', data.translatedText);
+      return data.translatedText;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('OpenAI API error:', error);
+    return null;
+  }
+}
+
+// Enhanced phrase-aware translation with LibreTranslate and OpenAI fallbacks
 export async function translateTextSmart(text: string): Promise<TranslationResult | null> {
   const cleanText = text.toLowerCase()
     .replace(/[.,!?;:"'()]/g, '')
@@ -145,6 +181,18 @@ export async function translateTextSmart(text: string): Promise<TranslationResul
     };
   }
   
+  // If LibreTranslate fails, try OpenAI as fallback
+  console.log('LibreTranslate failed, trying OpenAI API...');
+  const openAITranslation = await openAITranslateAPI(text, sourceLanguage, targetLanguage);
+  if (openAITranslation) {
+    console.log('OpenAI API success:', openAITranslation);
+    return {
+      translatedText: openAITranslation,
+      sourceLanguage,
+      targetLanguage
+    };
+  }
+  
   console.log('No translation found for:', cleanText);
   return null;
 }
@@ -160,10 +208,19 @@ export async function translateLongText(text: string, targetLanguage: 'en' | 'fr
   
   console.log('Translating long text:', text.substring(0, 50) + '...');
   
+  // Try LibreTranslate first
   const apiTranslation = await libreTranslateAPI(text, sourceLanguage, targetLanguage);
   if (apiTranslation) {
-    console.log('Long text translation success');
+    console.log('Long text translation success via LibreTranslate');
     return apiTranslation;
+  }
+  
+  // If LibreTranslate fails, try OpenAI
+  console.log('LibreTranslate failed for long text, trying OpenAI...');
+  const openAITranslation = await openAITranslateAPI(text, sourceLanguage, targetLanguage);
+  if (openAITranslation) {
+    console.log('Long text translation success via OpenAI');
+    return openAITranslation;
   }
   
   console.log('Long text translation failed');
