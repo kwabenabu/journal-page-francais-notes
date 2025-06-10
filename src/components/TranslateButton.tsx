@@ -12,12 +12,15 @@ const TranslateButton = ({ onTranslate }: TranslateButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {
+    if (isLoading) return; // Prevent multiple clicks while loading
+    
     setIsLoading(true);
     setFeedback("");
     
     try {
       console.log("Translation button clicked");
       const result = await onTranslate();
+      console.log("Translation result received:", result);
       
       if (!result) {
         setFeedback("Please select text first");
@@ -31,7 +34,9 @@ const TranslateButton = ({ onTranslate }: TranslateButtonProps) => {
       setFeedback("Translation failed");
       setTimeout(() => setFeedback(""), 2000);
     } finally {
+      // Ensure loading state is always reset
       setIsLoading(false);
+      console.log("Translation loading state reset");
     }
   };
 
