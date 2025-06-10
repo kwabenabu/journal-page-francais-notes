@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import ProfileSettings from "../components/ProfileSettings";
-import NavigationMenu from "../components/NavigationMenu";
+import AppLayout from "../components/AppLayout";
 
 const Settings = () => {
   const { user, loading } = useAuth();
@@ -28,12 +28,9 @@ const Settings = () => {
   }
 
   return (
-    <div className="flex">
-      <NavigationMenu />
-      <div className="flex-1 lg:ml-0">
-        <ProfileSettings />
-      </div>
-    </div>
+    <AppLayout title="Profile Settings">
+      <ProfileSettings />
+    </AppLayout>
   );
 };
 

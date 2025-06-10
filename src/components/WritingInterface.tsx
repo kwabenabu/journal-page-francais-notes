@@ -8,6 +8,9 @@ import AccessibilityHelper from "./AccessibilityHelper";
 import WritingLayout from "./writing/WritingLayout";
 import { useWritingKeyboardShortcuts } from "./writing/KeyboardShortcuts";
 import { useCommandActions } from "./writing/CommandActions";
+import AppLayout from "./AppLayout";
+import { Button } from "./ui/button";
+import { FileText } from "lucide-react";
 
 const WritingInterface = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -83,9 +86,19 @@ const WritingInterface = () => {
     return null;
   }
 
+  const newButton = (
+    <Button 
+      onClick={createNewEntry}
+      className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
+    >
+      <FileText className="w-4 h-4" />
+      <span>New</span>
+    </Button>
+  );
+
   return (
-    <AccessibilityHelper>
-      <div className="min-h-screen chrome-gradient">
+    <AppLayout title="Mes entrées" rightElement={newButton}>
+      <AccessibilityHelper>
         <WritingLayout
           handleTextSelect={handleTextSelect}
           handleSelectionClear={handleSelectionClear}
@@ -118,8 +131,8 @@ const WritingInterface = () => {
           translation={translation}
           handleCloseTooltip={handleCloseTooltip}
         />
-      </div>
-    </AccessibilityHelper>
+      </AccessibilityHelper>
+    </AppLayout>
   );
 };
 

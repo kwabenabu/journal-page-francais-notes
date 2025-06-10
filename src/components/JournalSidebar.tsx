@@ -3,7 +3,10 @@ import React, { useState } from "react";
 import { JournalEntry } from "../services/journalService";
 import { useLanguage } from "../contexts/LanguageContext";
 import { ScrollArea } from "./ui/scroll-area";
-import SidebarHeader from "./sidebar/SidebarHeader";
+import { Button } from "./ui/button";
+import { FileText, Search } from "lucide-react";
+import { Input } from "./ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import EntryTabs from "./sidebar/EntryTabs";
 import EnhancedSearch from "./EnhancedSearch";
 
@@ -48,34 +51,46 @@ const JournalSidebar = ({
   }, [drafts]);
 
   return (
-    <div className="h-full flex flex-col" role="complementary" aria-label="Journal sidebar">
-      <div className="flex-shrink-0">
-        <SidebarHeader onNewEntry={onNewEntry} />
-        
-        <div className="mb-6 px-4">
-          <EnhancedSearch
-            entries={entries}
-            drafts={drafts}
-            onSearch={handleSearchResults}
-            placeholder="Search entries... (Press / to focus)"
-            className="w-full"
-          />
+    <div className="h-full flex flex-col bg-background">
+      {/* Header */}
+      <div className="p-6 border-b border-border">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Mes entrées</h2>
+          <Button 
+            onClick={onNewEntry}
+            size="sm" 
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            New
+          </Button>
         </div>
+        <p className="text-sm text-muted-foreground">Manage your writing journey</p>
       </div>
 
-      <div className="flex-1 min-h-0 px-4">
-        <ScrollArea className="h-full">
-          <div className="pr-4">
-            <EntryTabs
-              filteredEntries={filteredEntries}
-              filteredDrafts={filteredDrafts}
-              currentEntry={currentEntry}
-              onLoadEntry={onLoadEntry}
-              onDeleteEntry={onDeleteEntry}
-            />
-          </div>
-        </ScrollArea>
+      {/* Search */}
+      <div className="p-4 border-b border-border">
+        <EnhancedSearch
+          entries={entries}
+          drafts={drafts}
+          onSearch={handleSearchResults}
+          placeholder="Search entries..."
+          className="w-full"
+        />
       </div>
+
+      {/* Content */}
+      <ScrollArea className="flex-1">
+        <div className="p-4">
+          <EntryTabs
+            filteredEntries={filteredEntries}
+            filteredDrafts={filteredDrafts}
+            currentEntry={currentEntry}
+            onLoadEntry={onLoadEntry}
+            onDeleteEntry={onDeleteEntry}
+          />
+        </div>
+      </ScrollArea>
     </div>
   );
 };

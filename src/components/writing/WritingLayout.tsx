@@ -84,53 +84,51 @@ const WritingLayout = ({
   handleCloseTooltip
 }: WritingLayoutProps) => {
   return (
-    <div className="relative z-10 min-h-screen" id="main-content">
+    <div className="flex h-full">
       <SmartTextSelector
         onTextSelect={handleTextSelect}
         onSelectionClear={handleSelectionClear}
         textareaRef={textareaRef}
       />
 
-      <div className="max-w-7xl mx-auto p-6">
-        {showDraftRecovery && (
-          <DraftRecovery
-            onRecoverDraft={recoverDraft}
-            onDismiss={() => setShowDraftRecovery(false)}
-          />
-        )}
-        
-        <div className="flex gap-8 animate-fade-in">
-          <div className="w-80 chrome-metallic rounded-2xl p-6 shadow-xl animate-scale-in">
-            <JournalSidebar
-              entries={entries}
-              drafts={drafts}
-              currentEntry={currentEntry}
-              onLoadEntry={loadEntry}
-              onDeleteEntry={deleteEntry}
-              onNewEntry={createNewEntry}
-              onSearch={searchEntries}
-            />
-          </div>
+      {showDraftRecovery && (
+        <DraftRecovery
+          onRecoverDraft={recoverDraft}
+          onDismiss={() => setShowDraftRecovery(false)}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div className="w-96 bg-background border-r border-border">
+        <JournalSidebar
+          entries={entries}
+          drafts={drafts}
+          currentEntry={currentEntry}
+          onLoadEntry={loadEntry}
+          onDeleteEntry={deleteEntry}
+          onNewEntry={createNewEntry}
+          onSearch={searchEntries}
+        />
+      </div>
 
-          <div className="flex-1 animate-scale-in" style={{ animationDelay: '100ms' }}>
-            <WritingEditor
-              content={content}
-              currentEntry={currentEntry}
-              saving={saving}
-              lastSaved={lastSaved}
-              lastAutoSaved={lastAutoSaved}
-              reviewing={reviewing}
-              error={error}
-              autoSaveEnabled={autoSaveEnabled}
-              textareaRef={textareaRef}
-              onContentChange={setContent}
-              onSave={saveEntry}
-              onTranslate={translateSelectedText}
-              onRequestReview={requestFrenchReview}
-              onManualSave={manualSave}
-            />
-          </div>
-        </div>
+      {/* Main Editor */}
+      <div className="flex-1">
+        <WritingEditor
+          content={content}
+          currentEntry={currentEntry}
+          saving={saving}
+          lastSaved={lastSaved}
+          lastAutoSaved={lastAutoSaved}
+          reviewing={reviewing}
+          error={error}
+          autoSaveEnabled={autoSaveEnabled}
+          textareaRef={textareaRef}
+          onContentChange={setContent}
+          onSave={saveEntry}
+          onTranslate={translateSelectedText}
+          onRequestReview={requestFrenchReview}
+          onManualSave={manualSave}
+        />
       </div>
 
       <CommandPalette
