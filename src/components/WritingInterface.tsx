@@ -97,7 +97,7 @@ const WritingInterface = () => {
   );
 
   return (
-    <AppLayout title="Mes entrées" rightElement={newButton}>
+    <AppLayout title="Journal" rightElement={newButton}>
       <AccessibilityHelper>
         <WritingLayout
           handleTextSelect={handleTextSelect}
