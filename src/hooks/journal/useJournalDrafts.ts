@@ -138,9 +138,13 @@ export const useJournalDrafts = ({
     setContent(entry.content || "");
     setCurrentEntry(entry);
     setError(null);
-    setAutoSaveEnabled(!entry.is_draft);
+    // Enable auto-save for all entries (drafts and published)
+    setAutoSaveEnabled(true);
     
-    localStorageService.saveDraft(entry.content || "", entry.id);
+    // For drafts, save to local storage so auto-save can continue from this point
+    if (entry.is_draft) {
+      localStorageService.saveDraft(entry.content || "", entry.id);
+    }
   };
 
   const recoverDraft = (draftContent: string, serverId?: string) => {

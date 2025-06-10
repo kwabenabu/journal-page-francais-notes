@@ -72,17 +72,43 @@ export const useJournal = () => {
     drafts
   });
 
-  // Auto-save functionality - only for saving on exit, not while typing
+  // Auto-save functionality - continuously saves while typing with debouncing
   const { manualSave, saveOnNavigate } = useAutoSave({
     content,
     entryId: currentEntry?.id || null,
     isEnabled: autoSaveEnabled && content.trim().length > 0,
     onAutoSave: (serverId) => {
-      console.log('Draft saved on exit:', serverId);
+      console.log('Draft auto-saved:', serverId);
       setLastAutoSaved(new Date());
       
+      // If this is a new draft (no current entry), create the entry object
       if (!currentEntry?.id && serverId) {
-        setCurrentEntry(prev => prev ? { ...prev, id: serverId } : null);
+        const newDraft = {
+          id: serverId,
+          content,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          user_id: user?.id || "",
+          is_draft: true,
+          auto_saved_at: new Date().toISOString()
+        };
+        setCurrentEntry(newDraft);
+        
+        // Add to drafts list if not already there
+        setDrafts(prev => {
+          const exists = prev.find(d => d.id === serverId);
+          if (exists) {
+            return prev.map(d => d.id === serverId ? newDraft : d);
+          }
+          return [newDraft, ...prev];
+        });
+      } else if (currentEntry?.is_draft) {
+        // Update existing draft in the drafts list
+        setDrafts(prev => prev.map(d => 
+          d.id === currentEntry.id 
+            ? { ...d, content, updated_at: new Date().toISOString(), auto_saved_at: new Date().toISOString() }
+            : d
+        ));
       }
     },
     onError: (error) => {
