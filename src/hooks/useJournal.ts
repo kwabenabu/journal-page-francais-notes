@@ -142,7 +142,8 @@ export const useJournal = () => {
     console.log("User authenticated, loading entries for:", user.email);
     entriesHook.loadEntries();
     entriesHook.loadDrafts();
-    draftsHook.checkForLocalDrafts();
+    // Draft recovery popup is now disabled
+    // draftsHook.checkForLocalDrafts();
   }, [user, loading, navigate]);
 
   const deleteEntry = (id: string) => {
@@ -161,7 +162,7 @@ export const useJournal = () => {
     reviewing,
     error,
     isSearching,
-    showDraftRecovery,
+    showDraftRecovery: false, // Always false to disable popup
     autoSaveEnabled,
     saveEntry: draftsHook.saveEntry,
     createNewEntry: draftsHook.createNewEntry,

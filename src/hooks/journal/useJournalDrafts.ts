@@ -41,15 +41,9 @@ export const useJournalDrafts = ({
   const navigate = useNavigate();
 
   const checkForLocalDrafts = () => {
-    const localDrafts = localStorageService.getAllDrafts();
-    const validDrafts = localDrafts.filter(draft => 
-      draft.content.trim().length > 0 && 
-      !draft.serverId
-    );
-    
-    if (validDrafts.length > 0) {
-      setShowDraftRecovery(true);
-    }
+    // Draft recovery popup is now disabled
+    // Local drafts will still be saved but popup won't show
+    console.log('Draft recovery popup disabled');
   };
 
   const saveEntry = async () => {

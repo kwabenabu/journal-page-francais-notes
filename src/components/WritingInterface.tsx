@@ -27,7 +27,6 @@ const WritingInterface = () => {
     lastAutoSaved,
     reviewing,
     error,
-    showDraftRecovery,
     autoSaveEnabled,
     saveEntry,
     createNewEntry,
@@ -91,7 +90,7 @@ const WritingInterface = () => {
           handleTextSelect={handleTextSelect}
           handleSelectionClear={handleSelectionClear}
           textareaRef={textareaRef}
-          showDraftRecovery={showDraftRecovery}
+          showDraftRecovery={false}
           recoverDraft={recoverDraft}
           setShowDraftRecovery={setShowDraftRecovery}
           entries={entries}
