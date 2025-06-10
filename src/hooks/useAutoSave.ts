@@ -9,7 +9,7 @@ interface UseAutoSaveOptions {
   isEnabled: boolean;
   onAutoSave?: (serverId: string) => void;
   onError?: (error: any) => void;
-  debounceMs?: number;
+  saveOnExit?: boolean; // New option to control when to save
 }
 
 export const useAutoSave = ({
@@ -18,9 +18,8 @@ export const useAutoSave = ({
   isEnabled,
   onAutoSave,
   onError,
-  debounceMs = 2000
+  saveOnExit = false // Default to false for normal auto-save behavior
 }: UseAutoSaveOptions) => {
-  const timeoutRef = useRef<NodeJS.Timeout>();
   const lastSavedContentRef = useRef<string>('');
   const isSavingRef = useRef(false);
 
@@ -62,37 +61,49 @@ export const useAutoSave = ({
     }
   }, [content, entryId, isEnabled, onAutoSave, onError]);
 
+  // Set up beforeunload event to save when leaving the page
   useEffect(() => {
-    if (!isEnabled) {
+    if (!saveOnExit || !isEnabled) {
       return;
     }
 
-    // Clear existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // Set new timeout
-    timeoutRef.current = setTimeout(performAutoSave, debounceMs);
-
-    // Cleanup on unmount or dependency change
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+    const handleBeforeUnload = () => {
+      if (content.trim().length > 0 && content !== lastSavedContentRef.current) {
+        // Save to local storage immediately when leaving
+        localStorageService.saveDraft(content, entryId || undefined);
+        
+        // Try to save to server (this may not complete due to page unload)
+        if (content.trim().length >= 10) {
+          performAutoSave();
+        }
       }
     };
-  }, [performAutoSave, debounceMs]);
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [content, entryId, isEnabled, saveOnExit, performAutoSave]);
 
   // Manual save function
   const manualSave = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
     performAutoSave();
   }, [performAutoSave]);
 
+  // Save on exit function for navigation changes
+  const saveOnNavigate = useCallback(() => {
+    if (content.trim().length > 0 && content !== lastSavedContentRef.current) {
+      localStorageService.saveDraft(content, entryId || undefined);
+      if (content.trim().length >= 10) {
+        performAutoSave();
+      }
+    }
+  }, [content, entryId, performAutoSave]);
+
   return {
     manualSave,
+    saveOnNavigate,
     isSaving: isSavingRef.current
   };
 };

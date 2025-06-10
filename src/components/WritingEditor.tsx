@@ -56,7 +56,7 @@ const WritingEditor = ({
       if (lastAutoSaved) {
         return `Draft auto-saved at ${lastAutoSaved.toLocaleTimeString('fr-FR')}`;
       }
-      return "Draft (auto-save enabled)";
+      return "Draft (saves when you leave)";
     }
     if (lastSaved) {
       return `${t('journal.savedAt')} ${lastSaved.toLocaleTimeString('fr-FR')}`;
@@ -66,7 +66,7 @@ const WritingEditor = ({
 
   const getStatusIcon = () => {
     if (saving) return <LoadingSpinner size="sm" className="text-blue-500" />;
-    if (autoSaveEnabled && hasUnsavedChanges) return <Cloud className="w-4 h-4 text-blue-500 animate-pulse-glow" />;
+    if (autoSaveEnabled && hasUnsavedChanges) return <Cloud className="w-4 h-4 text-blue-500" />;
     if (lastSaved || lastAutoSaved) return <Cloud className="w-4 h-4 text-emerald-500" />;
     return <CloudOff className="w-4 h-4 text-gray-400" />;
   };
@@ -86,7 +86,7 @@ const WritingEditor = ({
             {isDraft && (
               <div className="flex items-center space-x-3">
                 <p className="text-sm text-blue-700 font-medium bg-blue-100/80 backdrop-blur-sm px-3 py-1 rounded-full inline-block animate-fade-in">
-                  This is a draft. Click "Publish" to make it visible in your journal.
+                  This is a draft. Your work saves automatically when you leave this page.
                 </p>
                 <ProgressBar value={progressValue} className="w-32" gradient animated />
               </div>
@@ -201,7 +201,7 @@ const WritingEditor = ({
           {autoSaveEnabled && (
             <p className="mt-3 text-emerald-700 bg-emerald-50/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-emerald-200/60 inline-flex items-center space-x-2">
               <Cloud className="w-4 h-4" />
-              <span className="font-medium">Auto-save is enabled - your work is automatically saved as you type.</span>
+              <span className="font-medium">Your work automatically saves when you leave this page.</span>
             </p>
           )}
         </div>
@@ -273,9 +273,9 @@ const WritingEditor = ({
             </span>
             {isDraft && (
               <span className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
-                <div className="w-3 h-3 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-sm animate-pulse"></div>
-                <span className="font-medium">Draft mode</span>
-              </span>
+                <div className="w-3 h-3 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-sm"></div>
+                <span className="font-medium">Saves on exit</span>
+              </div>
             )}
           </div>
           

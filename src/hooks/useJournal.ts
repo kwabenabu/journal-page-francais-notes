@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { localStorageService } from "../services/localStorageService";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAutoSave } from "./useAutoSave";
 import { useJournalState } from "./journal/useJournalState";
 import { useJournalEntries } from "./journal/useJournalEntries";
@@ -14,6 +14,7 @@ export const useJournal = () => {
   const state = useJournalState();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Extract state values for easier access
   const {
@@ -71,13 +72,14 @@ export const useJournal = () => {
     drafts
   });
 
-  // Auto-save functionality
-  const { manualSave } = useAutoSave({
+  // Auto-save functionality - now only saves on exit
+  const { manualSave, saveOnNavigate } = useAutoSave({
     content,
     entryId: currentEntry?.id || null,
     isEnabled: autoSaveEnabled && content.trim().length > 0,
+    saveOnExit: true, // Enable save on exit behavior
     onAutoSave: (serverId) => {
-      console.log('Auto-save completed:', serverId);
+      console.log('Draft saved on exit:', serverId);
       setLastAutoSaved(new Date());
       
       if (!currentEntry?.id && serverId) {
@@ -89,6 +91,19 @@ export const useJournal = () => {
       setError("Auto-save failed, but your work is saved locally");
     }
   });
+
+  // Save when navigating away from the journal page
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (location.pathname !== '/' && content.trim().length > 0) {
+        console.log('Leaving journal page, saving draft...');
+        saveOnNavigate();
+      }
+    };
+
+    // This effect runs when location changes
+    return handleRouteChange;
+  }, [location, content, saveOnNavigate]);
 
   useEffect(() => {
     if (loading) return;
@@ -132,6 +147,7 @@ export const useJournal = () => {
     recoverDraft: draftsHook.recoverDraft,
     setShowDraftRecovery,
     manualSave,
+    saveOnNavigate,
     setAutoSaveEnabled
   };
 };

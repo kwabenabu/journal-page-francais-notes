@@ -1,7 +1,7 @@
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useJournal } from "../hooks/useJournal";
 import { useTranslation } from "../hooks/useTranslation";
 import AccessibilityHelper from "./AccessibilityHelper";
@@ -14,6 +14,7 @@ const WritingInterface = () => {
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const {
     content,
@@ -36,7 +37,8 @@ const WritingInterface = () => {
     searchEntries,
     recoverDraft,
     setShowDraftRecovery,
-    manualSave
+    manualSave,
+    saveOnNavigate
   } = useJournal();
 
   const {
@@ -46,6 +48,16 @@ const WritingInterface = () => {
     handleCloseTooltip,
     translateSelectedText
   } = useTranslation(textareaRef);
+
+  // Save draft when component unmounts or route changes
+  useEffect(() => {
+    return () => {
+      if (content.trim().length > 0) {
+        console.log('WritingInterface unmounting, saving draft...');
+        saveOnNavigate();
+      }
+    };
+  }, [content, saveOnNavigate]);
 
   // Set up keyboard shortcuts
   useWritingKeyboardShortcuts({
