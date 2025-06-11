@@ -1,4 +1,3 @@
-
 import { Save, Cloud, CloudOff, TrendingUp, Target, Clock, Zap } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { JournalEntry } from "../services/journalService";
@@ -7,7 +6,7 @@ import { LoadingSpinner } from "./ui/loading-spinner";
 import { ProgressBar } from "./ui/progress-bar";
 import TranslateButton from "./TranslateButton";
 import FrenchReview from "./FrenchReview";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface WritingEditorProps {
   content: string;
@@ -52,6 +51,60 @@ const WritingEditor = ({
   const characterCount = content.length;
   const readingTime = Math.ceil(wordCount / 200);
   const progressValue = Math.min((wordCount / 300) * 100, 100);
+
+  // Auto-scroll function to keep cursor visible
+  const scrollToCursor = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    // Get cursor position
+    const cursorPosition = textarea.selectionStart;
+    
+    // Create a temporary element to measure text
+    const div = document.createElement('div');
+    div.style.position = 'absolute';
+    div.style.visibility = 'hidden';
+    div.style.height = 'auto';
+    div.style.width = textarea.clientWidth + 'px';
+    div.style.fontSize = getComputedStyle(textarea).fontSize;
+    div.style.fontFamily = getComputedStyle(textarea).fontFamily;
+    div.style.lineHeight = getComputedStyle(textarea).lineHeight;
+    div.style.padding = getComputedStyle(textarea).padding;
+    div.style.whiteSpace = 'pre-wrap';
+    div.style.wordWrap = 'break-word';
+    
+    document.body.appendChild(div);
+    
+    // Get text up to cursor
+    const textToCursor = content.substring(0, cursorPosition);
+    div.textContent = textToCursor;
+    
+    const cursorHeight = div.scrollHeight;
+    document.body.removeChild(div);
+    
+    // Calculate if we need to scroll
+    const lineHeight = parseInt(getComputedStyle(textarea).lineHeight);
+    const scrollTop = textarea.scrollTop;
+    const clientHeight = textarea.clientHeight;
+    
+    // If cursor is below visible area, scroll down
+    if (cursorHeight > scrollTop + clientHeight) {
+      textarea.scrollTop = cursorHeight - clientHeight + lineHeight;
+    }
+    // If cursor is above visible area, scroll up
+    else if (cursorHeight < scrollTop) {
+      textarea.scrollTop = Math.max(0, cursorHeight - lineHeight);
+    }
+  }, [content, textareaRef]);
+
+  // Enhanced content change handler with auto-scroll
+  const handleContentChange = useCallback((newContent: string) => {
+    onContentChange(newContent);
+    // Use requestAnimationFrame to ensure DOM is updated before scrolling
+    requestAnimationFrame(() => {
+      scrollToCursor();
+    });
+  }, [onContentChange, scrollToCursor]);
 
   // Dynamic writing tips based on content
   useEffect(() => {
@@ -244,9 +297,9 @@ const WritingEditor = ({
             <textarea
               ref={textareaRef}
               value={content}
-              onChange={(e) => onContentChange(e.target.value)}
+              onChange={(e) => handleContentChange(e.target.value)}
               placeholder="Ex. Aujourd'hui, j'ai appris le mot 's'améliorer' qui signifie 'to improve'. Je pense que c'est un mot très utile pour décrire mon parcours d'apprentissage du français..."
-              className="w-full h-96 p-8 border-2 border-gray-200/70 rounded-3xl resize-none focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-400 text-gray-800 text-lg leading-relaxed transition-all duration-300 bg-white/80 backdrop-blur-sm placeholder:text-gray-400 placeholder:italic shadow-inner hover:bg-white/90 focus:bg-white/95 hover:shadow-lg focus:shadow-xl font-serif"
+              className="w-full h-96 p-8 border-2 border-gray-200/70 rounded-3xl resize-none focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-400 text-gray-800 text-lg leading-relaxed transition-all duration-300 bg-white/80 backdrop-blur-sm placeholder:text-gray-400 placeholder:italic shadow-inner hover:bg-white/90 focus:bg-white/95 hover:shadow-lg focus:shadow-xl font-serif overflow-y-auto"
               style={{ fontFamily: 'inherit' }}
             />
             
@@ -308,3 +361,5 @@ const WritingEditor = ({
 };
 
 export default WritingEditor;
+
+</edits_to_apply>
