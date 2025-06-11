@@ -402,7 +402,7 @@ const WritingEditor = ({
                 <span className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200 cursor-pointer">
                   <div className="w-3 h-3 bg-gradient-to-r from-amber-400 to-orange-600 rounded-full shadow-md animate-pulse"></div>
                   <span className="font-semibold">Auto-saving</span>
-                </div>
+                </span>
               )}
             </div>
             
@@ -425,5 +425,3 @@ const WritingEditor = ({
 };
 
 export default WritingEditor;
-
-```
