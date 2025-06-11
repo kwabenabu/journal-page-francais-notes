@@ -1,3 +1,4 @@
+
 import { JournalEntry } from "../../services/journalService";
 import SmartTextSelector from "../SmartTextSelector";
 import JournalSidebar from "../JournalSidebar";
@@ -84,7 +85,7 @@ const WritingLayout = ({
   handleCloseTooltip
 }: WritingLayoutProps) => {
   return (
-    <div className="flex h-full bg-gradient-to-br from-blue-50/30 to-indigo-50/30">
+    <div className="flex h-full bg-gradient-to-br from-blue-50/30 to-indigo-50/30 w-full">
       <SmartTextSelector
         onTextSelect={handleTextSelect}
         onSelectionClear={handleSelectionClear}
@@ -98,8 +99,8 @@ const WritingLayout = ({
         />
       )}
       
-      {/* Enhanced Sidebar */}
-      <div className="w-96 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-lg">
+      {/* Enhanced Sidebar - Hidden on small screens, managed by AppLayout */}
+      <div className="hidden lg:block w-96 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-lg">
         <div className="h-full flex flex-col">
           {/* Stats Section */}
           <div className="border-b border-gray-200/50">
@@ -122,7 +123,7 @@ const WritingLayout = ({
       </div>
 
       {/* Main Editor */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 p-6 overflow-auto min-w-0">
         <WritingEditor
           content={content}
           currentEntry={currentEntry}

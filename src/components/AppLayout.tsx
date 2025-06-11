@@ -1,6 +1,6 @@
 
 import { ReactNode, useState } from "react";
-import { Settings, Menu, X } from "lucide-react";
+import { Settings, Menu } from "lucide-react";
 import AppSidebar from "./AppSidebar";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "../contexts/AuthContext";
@@ -17,7 +17,7 @@ const AppLayout = ({ children, title, rightElement }: AppLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex w-full">
       {/* Overlay for mobile */}
       {sidebarOpen && (
         <div 
@@ -26,7 +26,7 @@ const AppLayout = ({ children, title, rightElement }: AppLayoutProps) => {
         />
       )}
 
-      {/* Collapsible Sidebar */}
+      {/* Sidebar */}
       <div className={`
         fixed top-0 left-0 h-full z-50 transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -35,7 +35,7 @@ const AppLayout = ({ children, title, rightElement }: AppLayoutProps) => {
         <AppSidebar onClose={() => setSidebarOpen(false)} />
       </div>
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
         <header className="bg-background border-b border-border px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -43,7 +43,7 @@ const AppLayout = ({ children, title, rightElement }: AppLayoutProps) => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setSidebarOpen(true)}
+              onClick={() => setSidebarOpen(!sidebarOpen)}
               className="lg:hidden"
             >
               <Menu className="w-5 h-5" />
@@ -63,7 +63,7 @@ const AppLayout = ({ children, title, rightElement }: AppLayoutProps) => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">French Journal</span>
+            <span className="text-sm text-muted-foreground hidden sm:block">French Journal</span>
             <ThemeToggle />
             <Settings className="w-5 h-5 text-muted-foreground" />
             {user && (
