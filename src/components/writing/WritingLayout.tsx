@@ -1,4 +1,3 @@
-
 import { JournalEntry } from "../../services/journalService";
 import SmartTextSelector from "../SmartTextSelector";
 import JournalSidebar from "../JournalSidebar";
@@ -6,6 +5,7 @@ import WritingEditor from "../WritingEditor";
 import DraftRecovery from "../DraftRecovery";
 import CommandPalette from "../CommandPalette";
 import TranslationTooltip from "../TranslationTooltip";
+import SidebarStats from "../sidebar/SidebarStats";
 
 interface WritingLayoutProps {
   // SmartTextSelector props
@@ -84,7 +84,7 @@ const WritingLayout = ({
   handleCloseTooltip
 }: WritingLayoutProps) => {
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-gradient-to-br from-blue-50/30 to-indigo-50/30">
       <SmartTextSelector
         onTextSelect={handleTextSelect}
         onSelectionClear={handleSelectionClear}
@@ -98,21 +98,31 @@ const WritingLayout = ({
         />
       )}
       
-      {/* Sidebar */}
-      <div className="w-96 bg-background border-r border-border">
-        <JournalSidebar
-          entries={entries}
-          drafts={drafts}
-          currentEntry={currentEntry}
-          onLoadEntry={loadEntry}
-          onDeleteEntry={deleteEntry}
-          onNewEntry={createNewEntry}
-          onSearch={searchEntries}
-        />
+      {/* Enhanced Sidebar */}
+      <div className="w-96 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-lg">
+        <div className="h-full flex flex-col">
+          {/* Stats Section */}
+          <div className="border-b border-gray-200/50">
+            <SidebarStats entries={entries} drafts={drafts} />
+          </div>
+          
+          {/* Journal Sidebar */}
+          <div className="flex-1 overflow-hidden">
+            <JournalSidebar
+              entries={entries}
+              drafts={drafts}
+              currentEntry={currentEntry}
+              onLoadEntry={loadEntry}
+              onDeleteEntry={deleteEntry}
+              onNewEntry={createNewEntry}
+              onSearch={searchEntries}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Main Editor */}
-      <div className="flex-1">
+      <div className="flex-1 p-6 overflow-auto">
         <WritingEditor
           content={content}
           currentEntry={currentEntry}
