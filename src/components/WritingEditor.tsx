@@ -6,7 +6,7 @@ import { LoadingSpinner } from "./ui/loading-spinner";
 import { ProgressBar } from "./ui/progress-bar";
 import TranslateButton from "./TranslateButton";
 import FrenchReview from "./FrenchReview";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface WritingEditorProps {
   content: string;
@@ -44,6 +44,10 @@ const WritingEditor = ({
   const { t } = useLanguage();
   const [showToolbar, setShowToolbar] = useState(false);
   const [dynamicTip, setDynamicTip] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [showStats, setShowStats] = useState(true);
+  const [isHoveringStats, setIsHoveringStats] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isDraft = currentEntry?.is_draft;
   const hasUnsavedChanges = content !== (currentEntry?.content || "");
@@ -97,14 +101,59 @@ const WritingEditor = ({
     }
   }, [content, textareaRef]);
 
-  // Enhanced content change handler with auto-scroll
+  // Enhanced content change handler with auto-scroll and typing detection
   const handleContentChange = useCallback((newContent: string) => {
     onContentChange(newContent);
+    
+    // Set typing state and hide stats
+    setIsTyping(true);
+    setShowStats(false);
+    
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Set new timeout to show stats after idle period
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      if (!isHoveringStats) {
+        setShowStats(true);
+      }
+    }, 2000); // Show stats 2 seconds after typing stops
+    
     // Use requestAnimationFrame to ensure DOM is updated before scrolling
     requestAnimationFrame(() => {
       scrollToCursor();
     });
-  }, [onContentChange, scrollToCursor]);
+  }, [onContentChange, scrollToCursor, isHoveringStats]);
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handle stats area hover
+  const handleStatsMouseEnter = useCallback(() => {
+    setIsHoveringStats(true);
+    setShowStats(true);
+  }, []);
+
+  const handleStatsMouseLeave = useCallback(() => {
+    setIsHoveringStats(false);
+    if (!isTyping) {
+      // Small delay before hiding to prevent flickering
+      setTimeout(() => {
+        if (!isHoveringStats) {
+          setShowStats(true); // Keep visible when not typing
+        }
+      }, 100);
+    }
+  }, [isTyping, isHoveringStats]);
 
   // Dynamic writing tips based on content
   useEffect(() => {
@@ -303,8 +352,14 @@ const WritingEditor = ({
               style={{ fontFamily: 'inherit' }}
             />
             
-            {/* Enhanced floating stats with icons */}
-            <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-md px-6 py-4 rounded-2xl border border-gray-200/70 text-sm text-gray-600 shadow-xl hover:shadow-2xl transition-all duration-300">
+            {/* Enhanced floating stats with smart visibility */}
+            <div 
+              className={`absolute bottom-6 right-6 bg-white/95 backdrop-blur-md px-6 py-4 rounded-2xl border border-gray-200/70 text-sm text-gray-600 shadow-xl hover:shadow-2xl transition-all duration-500 ${
+                showStats ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
+              }`}
+              onMouseEnter={handleStatsMouseEnter}
+              onMouseLeave={handleStatsMouseLeave}
+            >
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2 group hover:scale-105 transition-transform duration-200">
                   <TrendingUp className="w-4 h-4 text-blue-500 group-hover:rotate-12 transition-transform duration-200" />
@@ -322,6 +377,15 @@ const WritingEditor = ({
                 </div>
               </div>
             </div>
+            
+            {/* Invisible hover zone for stats when hidden */}
+            {!showStats && (
+              <div 
+                className="absolute bottom-0 right-0 w-32 h-20 cursor-pointer"
+                onMouseEnter={handleStatsMouseEnter}
+                title="Hover to show writing stats"
+              />
+            )}
           </div>
           
           <div className="mt-8 flex justify-between items-center text-sm text-gray-500">
@@ -338,7 +402,7 @@ const WritingEditor = ({
                 <span className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200 cursor-pointer">
                   <div className="w-3 h-3 bg-gradient-to-r from-amber-400 to-orange-600 rounded-full shadow-md animate-pulse"></div>
                   <span className="font-semibold">Auto-saving</span>
-                </span>
+                </div>
               )}
             </div>
             
@@ -361,3 +425,5 @@ const WritingEditor = ({
 };
 
 export default WritingEditor;
+
+```
