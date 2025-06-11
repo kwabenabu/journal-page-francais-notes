@@ -361,5 +361,3 @@ const WritingEditor = ({
 };
 
 export default WritingEditor;
-
-</edits_to_apply>
