@@ -1,5 +1,5 @@
 
-import { Home, BarChart3, Settings, HelpCircle, BookOpen, X } from "lucide-react";
+import { Home, Settings, HelpCircle, BookOpen, X } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -17,12 +17,6 @@ const AppSidebar = ({ onClose }: AppSidebarProps) => {
       href: "/",
       icon: BookOpen,
       current: location.pathname === "/"
-    },
-    {
-      name: "Dashboard",
-      href: "/dashboard",
-      icon: BarChart3,
-      current: location.pathname === "/dashboard"
     },
     {
       name: "Settings",

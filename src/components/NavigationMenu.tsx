@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Menu, X, Home, BarChart3, Settings, HelpCircle } from "lucide-react";
+import { Menu, X, Home, Settings, HelpCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const NavigationMenu = () => {
@@ -10,7 +10,6 @@ const NavigationMenu = () => {
 
   const menuItems = [
     { path: '/', label: 'Journal', icon: Home },
-    { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
     { path: '/settings', label: 'Settings', icon: Settings },
     { path: '/help', label: 'Help', icon: HelpCircle }
   ];
