@@ -9,7 +9,6 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./components/ThemeProvider";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import DashboardPage from "./pages/DashboardPage";
 import Settings from "./pages/Settings";
 import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
@@ -27,7 +26,6 @@ const App = () => (
             <LanguageProvider>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/help" element={<Help />} />
                 <Route path="/auth" element={<Auth />} />
