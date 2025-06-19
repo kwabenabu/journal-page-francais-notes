@@ -52,36 +52,36 @@ const JournalSidebar = ({
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Header */}
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Mes entrées</h2>
+      {/* Mobile-optimized Header */}
+      <div className="p-4 sm:p-6 border-b border-border">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h2 className="text-base sm:text-lg font-semibold">Mes entrées</h2>
           <Button 
             onClick={onNewEntry}
             size="sm" 
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-blue-600 hover:bg-blue-700 text-white touch-manipulation px-3 py-2"
           >
-            <FileText className="w-4 h-4 mr-2" />
-            New
+            <FileText className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="text-xs sm:text-sm">New</span>
           </Button>
         </div>
-        <p className="text-sm text-muted-foreground">Manage your writing journey</p>
+        <p className="text-xs sm:text-sm text-muted-foreground">Manage your writing journey</p>
       </div>
 
-      {/* Search */}
-      <div className="p-4 border-b border-border">
+      {/* Mobile-optimized Search */}
+      <div className="p-3 sm:p-4 border-b border-border">
         <EnhancedSearch
           entries={entries}
           drafts={drafts}
           onSearch={handleSearchResults}
           placeholder="Search entries..."
-          className="w-full"
+          className="w-full h-10 sm:h-9 text-base sm:text-sm touch-manipulation"
         />
       </div>
 
-      {/* Content */}
+      {/* Mobile-responsive Content */}
       <ScrollArea className="flex-1">
-        <div className="p-4">
+        <div className="p-3 sm:p-4">
           <EntryTabs
             filteredEntries={filteredEntries}
             filteredDrafts={filteredDrafts}

@@ -10,7 +10,9 @@ import { useWritingKeyboardShortcuts } from "./writing/KeyboardShortcuts";
 import { useCommandActions } from "./writing/CommandActions";
 import AppLayout from "./AppLayout";
 import { Button } from "./ui/button";
-import { FileText } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
+import { FloatingActionButton } from "./ui/floating-action-button";
+import { useIsMobile } from "../hooks/use-mobile";
 
 const WritingInterface = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -18,6 +20,7 @@ const WritingInterface = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   const {
     content,
@@ -86,51 +89,66 @@ const WritingInterface = () => {
     return null;
   }
 
-  const newButton = (
+  // Mobile-first New Button
+  const newButton = isMobile ? null : (
     <Button 
       onClick={createNewEntry}
-      className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
+      className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2 touch-manipulation"
     >
       <FileText className="w-4 h-4" />
-      <span>New</span>
+      <span className="hidden sm:inline">New Entry</span>
+      <span className="sm:hidden">New</span>
     </Button>
   );
 
   return (
     <AppLayout title="Journal" rightElement={newButton}>
       <AccessibilityHelper>
-        <WritingLayout
-          handleTextSelect={handleTextSelect}
-          handleSelectionClear={handleSelectionClear}
-          textareaRef={textareaRef}
-          showDraftRecovery={false}
-          recoverDraft={recoverDraft}
-          setShowDraftRecovery={setShowDraftRecovery}
-          entries={entries}
-          drafts={drafts}
-          currentEntry={currentEntry}
-          loadEntry={loadEntry}
-          deleteEntry={deleteEntry}
-          createNewEntry={createNewEntry}
-          searchEntries={searchEntries}
-          content={content}
-          saving={saving}
-          lastSaved={lastSaved}
-          lastAutoSaved={lastAutoSaved}
-          reviewing={reviewing}
-          error={error}
-          autoSaveEnabled={autoSaveEnabled}
-          setContent={setContent}
-          saveEntry={saveEntry}
-          translateSelectedText={translateSelectedText}
-          requestFrenchReview={requestFrenchReview}
-          manualSave={manualSave}
-          showCommandPalette={showCommandPalette}
-          setShowCommandPalette={setShowCommandPalette}
-          commandActions={commandActions}
-          translation={translation}
-          handleCloseTooltip={handleCloseTooltip}
-        />
+        <div className="relative w-full">
+          <WritingLayout
+            handleTextSelect={handleTextSelect}
+            handleSelectionClear={handleSelectionClear}
+            textareaRef={textareaRef}
+            showDraftRecovery={false}
+            recoverDraft={recoverDraft}
+            setShowDraftRecovery={setShowDraftRecovery}
+            entries={entries}
+            drafts={drafts}
+            currentEntry={currentEntry}
+            loadEntry={loadEntry}
+            deleteEntry={deleteEntry}
+            createNewEntry={createNewEntry}
+            searchEntries={searchEntries}
+            content={content}
+            saving={saving}
+            lastSaved={lastSaved}
+            lastAutoSaved={lastAutoSaved}
+            reviewing={reviewing}
+            error={error}
+            autoSaveEnabled={autoSaveEnabled}
+            setContent={setContent}
+            saveEntry={saveEntry}
+            translateSelectedText={translateSelectedText}
+            requestFrenchReview={requestFrenchReview}
+            manualSave={manualSave}
+            showCommandPalette={showCommandPalette}
+            setShowCommandPalette={setShowCommandPalette}
+            commandActions={commandActions}
+            translation={translation}
+            handleCloseTooltip={handleCloseTooltip}
+          />
+
+          {/* Mobile Floating Action Button for New Entry */}
+          {isMobile && (
+            <FloatingActionButton
+              icon={Plus}
+              onClick={createNewEntry}
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl"
+              position="bottom-right"
+              size="lg"
+            />
+          )}
+        </div>
       </AccessibilityHelper>
     </AppLayout>
   );

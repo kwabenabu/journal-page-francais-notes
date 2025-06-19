@@ -7,6 +7,7 @@ import DraftRecovery from "../DraftRecovery";
 import CommandPalette from "../CommandPalette";
 import TranslationTooltip from "../TranslationTooltip";
 import SidebarStats from "../sidebar/SidebarStats";
+import { useIsMobile } from "../../hooks/use-mobile";
 
 interface WritingLayoutProps {
   // SmartTextSelector props
@@ -44,7 +45,7 @@ interface WritingLayoutProps {
   
   // CommandPalette props
   showCommandPalette: boolean;
-  setShowCommandPalette: (show: boolean) => void;
+  setShowCommandPalette: (show: boolean)=> void;
   commandActions: any[];
   
   // TranslationTooltip props
@@ -84,6 +85,8 @@ const WritingLayout = ({
   translation,
   handleCloseTooltip
 }: WritingLayoutProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="flex h-full bg-gradient-to-br from-blue-50/30 to-indigo-50/30 w-full">
       <SmartTextSelector
@@ -99,47 +102,51 @@ const WritingLayout = ({
         />
       )}
       
-      {/* Enhanced Sidebar - Hidden on small screens, managed by AppLayout */}
-      <div className="hidden lg:block w-96 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-lg">
-        <div className="h-full flex flex-col">
-          {/* Stats Section */}
-          <div className="border-b border-gray-200/50">
-            <SidebarStats entries={entries} drafts={drafts} />
-          </div>
-          
-          {/* Journal Sidebar */}
-          <div className="flex-1 overflow-hidden">
-            <JournalSidebar
-              entries={entries}
-              drafts={drafts}
-              currentEntry={currentEntry}
-              onLoadEntry={loadEntry}
-              onDeleteEntry={deleteEntry}
-              onNewEntry={createNewEntry}
-              onSearch={searchEntries}
-            />
+      {/* Mobile-responsive Sidebar - Hidden on mobile, managed by AppLayout */}
+      {!isMobile && (
+        <div className="hidden lg:block w-80 xl:w-96 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-lg">
+          <div className="h-full flex flex-col">
+            {/* Stats Section */}
+            <div className="border-b border-gray-200/50">
+              <SidebarStats entries={entries} drafts={drafts} />
+            </div>
+            
+            {/* Journal Sidebar */}
+            <div className="flex-1 overflow-hidden">
+              <JournalSidebar
+                entries={entries}
+                drafts={drafts}
+                currentEntry={currentEntry}
+                onLoadEntry={loadEntry}
+                onDeleteEntry={deleteEntry}
+                onNewEntry={createNewEntry}
+                onSearch={searchEntries}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Main Editor */}
-      <div className="flex-1 p-6 overflow-auto min-w-0">
-        <WritingEditor
-          content={content}
-          currentEntry={currentEntry}
-          saving={saving}
-          lastSaved={lastSaved}
-          lastAutoSaved={lastAutoSaved}
-          reviewing={reviewing}
-          error={error}
-          autoSaveEnabled={autoSaveEnabled}
-          textareaRef={textareaRef}
-          onContentChange={setContent}
-          onSave={saveEntry}
-          onTranslate={translateSelectedText}
-          onRequestReview={requestFrenchReview}
-          onManualSave={manualSave}
-        />
+      {/* Mobile-first Main Editor */}
+      <div className="flex-1 p-3 sm:p-4 lg:p-6 overflow-auto min-w-0 w-full">
+        <div className="max-w-4xl mx-auto w-full">
+          <WritingEditor
+            content={content}
+            currentEntry={currentEntry}
+            saving={saving}
+            lastSaved={lastSaved}
+            lastAutoSaved={lastAutoSaved}
+            reviewing={reviewing}
+            error={error}
+            autoSaveEnabled={autoSaveEnabled}
+            textareaRef={textareaRef}
+            onContentChange={setContent}
+            onSave={saveEntry}
+            onTranslate={translateSelectedText}
+            onRequestReview={requestFrenchReview}
+            onManualSave={manualSave}
+          />
+        </div>
       </div>
 
       <CommandPalette
