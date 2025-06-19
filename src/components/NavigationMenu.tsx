@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Menu, X, Home, Settings, HelpCircle } from "lucide-react";
+import { Menu, X, Home, Settings, HelpCircle, Book } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const NavigationMenu = () => {
@@ -10,6 +10,7 @@ const NavigationMenu = () => {
 
   const menuItems = [
     { path: '/', label: 'Journal', icon: Home },
+    { path: '/vocabulary', label: 'Vocabulary', icon: Book },
     { path: '/settings', label: 'Settings', icon: Settings },
     { path: '/help', label: 'Help', icon: HelpCircle }
   ];

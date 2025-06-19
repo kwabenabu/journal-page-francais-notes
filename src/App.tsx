@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
 import Help from "./pages/Help";
+import Vocabulary from "./pages/Vocabulary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <LanguageProvider>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/help" element={<Help />} />
                 <Route path="/auth" element={<Auth />} />

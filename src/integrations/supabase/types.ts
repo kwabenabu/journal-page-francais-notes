@@ -153,6 +153,50 @@ export type Database = {
         }
         Relationships: []
       }
+      vocabulary_words: {
+        Row: {
+          created_at: string
+          english_translation: string
+          example_sentence: string | null
+          french_word: string
+          id: string
+          journal_entry_id: string | null
+          part_of_speech: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          english_translation: string
+          example_sentence?: string | null
+          french_word: string
+          id?: string
+          journal_entry_id?: string | null
+          part_of_speech?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          english_translation?: string
+          example_sentence?: string | null
+          french_word?: string
+          id?: string
+          journal_entry_id?: string | null
+          part_of_speech?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vocabulary_words_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       writing_stats: {
         Row: {
           created_at: string
